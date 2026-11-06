@@ -59,7 +59,7 @@ export const ZONAS = [
     { id: 'telhado', nome: 'Tesoura de telhado' },
     { id: 'alvenaria', nome: 'Alvenaria estrutural' },
   ] },
-  { id: 'H', nome: 'Praça da Estrutura', c: 3, r: 1, obras: [] },
+  { id: 'H', nome: 'Central de concreto e aço', c: 3, r: 1, obras: [] },
 ].map((z) => ({ ...z, x: cx(z.c), z: cz(z.r) }));
 
 export const zona = (id) => ZONAS.find((z) => z.id === id);

@@ -190,10 +190,21 @@ const VINHETAS = {
       g.add(at(box(0.38, 0.19, 0.14, f % 2 ? 0xa9a69e : 0xb7b4ac, { sombra: b % 2 === 0 }), 6 + b * 0.4 + (f % 2) * 0.2, 0.1 + f * 0.2, 10));
   },
   H(g) {
-    // pórtico de entrada com pilares e viga, e bancos
-    [-6, 6].forEach((x) => g.add(at(box(0.8, 6, 0.8, C.pilar), x, 3, 0)));
-    g.add(at(box(13.6, 1, 0.8, C.concreto), 0, 6.5, 0));
-    for (let i = 0; i < 4; i++) g.add(at(box(3, 0.45, 0.9, C.madeira), -9 + i * 6, 0.45, 10));
-    g.add(at(cyl(4, 4, 0.3, 0xa7aea0, 16), 0, 0.15, -12));
+    // central dosadora de concreto: silos, misturador elevado, correia, baias de agregados
+    [-14, -9.5, -5].forEach((x) => {
+      g.add(at(cyl(1.6, 1.6, 9, 0xd9d8d2, 14), x, 6.5, -14));
+      g.add(at(cyl(1.6, 0.4, 1.6, 0xc9c8c2, 14), x, 1.2, -14));
+      [-1, 1].forEach((s) => g.add(at(box(0.2, 2, 0.2, C.metal), x + s * 1.2, 1, -14)));
+    });
+    g.add(at(box(6, 3.5, 5, 0x6f7c86), 4, 6.2, -14));
+    [-1, 1].forEach((s) => [-1, 1].forEach((k) => g.add(at(box(0.3, 4.5, 0.3, C.metal), 4 + s * 2.6, 2.25, -14 + k * 2.2))));
+    const esteira = box(16, 0.4, 1.2, 0x40546a); esteira.position.set(14, 4.2, -14); esteira.rotation.z = 0.32; g.add(esteira);
+    [0xb09a7a, 0x8f8a80, 0xc8b48d].forEach((c, i) => g.add(at(box(6, 1.6, 6, c), 8 + i * 6.5, 0.8, 2)));
+    [-1, 1].forEach((s) => g.add(at(box(0.4, 2, 20, 0xb9b8b1), 4.6 + s * 0, 1, 2)));
+    // depósito de aço: pilhas de barras e perfis
+    for (let k = 0; k < 4; k++) for (let i = 0; i < 6; i++) g.add(at(box(12, 0.12, 0.12, 0x8b5a3c, { sombra: i === 0 }), -10, 0.15 + k * 0.14, 6 + i * 0.16));
+    for (let k = 0; k < 3; k++) g.add(at(box(10, 0.35, 0.3, 0x6f8291), -10, 0.2 + k * 0.36, 10));
+    g.add(at(box(8, 3, 6, 0xd8d6cf), -12, 1.5, 18));
+    g.add(at(box(8.4, 0.3, 6.4, 0x8b8f93), -12, 3.1, 18));
   },
 };

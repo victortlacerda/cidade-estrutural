@@ -1,12 +1,33 @@
 # Cidade Estrutural — Roadmap
 
-**Versão v0.2 · 06/11/2026**
+**Versão v0.3 · 06/11/2026**
 
 Um mundo 3D navegável no navegador em que cada lote é uma zona temática de engenharia estrutural, e cada obra tem uma sequência animada em vista em corte: do canteiro (fôrma, armadura, concretagem) até o comportamento estrutural (esforços, tensões, fissuras, flecha), com números calculados em código e o texto escrito a partir deles.
 
 Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte com painéis planares), do Showroom 3D (regras puras testadas antes da cena) e da Arena (roadmap vivo, decisões numeradas, arquivo único que abre por duplo clique).
 
-## O que mudou nesta rodada (v0.2)
+## O que mudou nesta rodada (v0.3) — cidade viva
+
+Pedido do usuário: "está meio sem vida, não parece uma cidade dinâmica com interação entre as obras".
+
+- **Trânsito:** 16 carros e 2 ônibus circulando pela malha de ruas, na mão de direção.
+- **Pedestres:** 24 pessoas andando nas calçadas em volta dos lotes.
+- **Logística que liga as obras** (veículos com etiqueta clicável):
+  - betoneira: central (H) → viga (A) → central;
+  - van do laboratório: leva os corpos de prova da viga (A) para o laboratório (E) e volta;
+  - carreta de aço: depósito (H) → viga (A) → amostra para o laboratório (E) → treliça (B) → depósito;
+  - basculante: brita da central (H) → pontes (C).
+- **Zona H virou "Central de concreto e aço"**: silos, misturador, esteira, baias de agregados e depósito de barras.
+- **Canteiros trabalhando:** 2 gruas girando e içando carga (A e D), operários em todas as zonas, carros atravessando as três pontes, elevadores subindo nos prédios, prensa batendo no laboratório, pás do misturador girando.
+- **Interação:**
+  - placas de zona clicáveis, com a atividade do momento ("Betoneira descarregando concreto na viga");
+  - botões laranja "▶ Abrir obra" na própria cena;
+  - painel "Agora na cidade" com os últimos eventos e um botão "Seguir" que põe a câmera atrás do veículo.
+- **Atalhos entre obras:** a viga leva aos ensaios do seu concreto (E1) e do seu aço (E2), e os ensaios voltam para a etapa certa da viga.
+- O índice de zonas agora abre pelo botão "Zonas", para não tampar a cena.
+- Malha viária em módulo puro (`src/core/malha.js`) com 5 testes novos (19 no total).
+
+## Rodada anterior (v0.2)
 
 - **Obra E1 — Compressão do corpo de prova** pronta (6 etapas, 1:50 min).
 - **Obra E2 — Tração da barra de aço CA-50** pronta (7 etapas, 1:40 min), com a barra deformando de verdade: nervuras, base de medida, estricção e ruptura.
@@ -41,7 +62,7 @@ Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte c
 | E | Laboratório de materiais | [x] Compressão do corpo de prova · [x] Tração da barra de aço · [ ] Abatimento (slump) |
 | F | Patologias e reforço | [ ] Corrosão de armadura · [ ] Reforço com fibra de carbono |
 | G | Madeira e alvenaria | [ ] Tesoura de telhado · [ ] Alvenaria estrutural |
-| H | Praça da Estrutura | Entrada da cidade (pórtico, bancos) |
+| H | Central de concreto e aço | Abastece as obras (betoneira, carreta, basculante) |
 
 ## 3. Obras prontas
 
@@ -126,12 +147,14 @@ src/
   world.js         ruas, lotes, placas, vinhetas
   core/obra.js     base de obra: relógio, ciclo, rótulos, câmera por etapa
   calc/ensaios.js  cálculos PUROS dos ensaios E1 e E2
+  core/malha.js    malha viária PURA: cruzamentos, entradas dos lotes, rotas, faixa da direita
+  vida.js          trânsito, pedestres, logística, gruas, placas e etiquetas clicáveis
   zones/viga.js    obra A1 (contrato abaixo)
   zones/lab.js     sala de laboratório em corte (compartilhada)
   zones/compressao.js, zones/tracao.js   obras E1 e E2
   ui/ui.js         índice, ficha da obra, linha do tempo, tour
   main.js          monta tudo e roda o laço
-tests/viga.test.js, tests/ensaios.test.js
+tests/viga.test.js, tests/ensaios.test.js, tests/malha.test.js
 scripts/artifact.mjs   gera dist/cidade-estrutural.html e dist/artifact.html
 scripts/cutn.mjs       fotos headless por instante da obra
 ```
@@ -154,10 +177,17 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 ### Perguntas abertas
 
+- **D10 · Logística sincronizada** — ⭐ a betoneira chega à viga exatamente quando a obra entra na concretagem (mais didático) · deixar independente, como agora (mais simples). Ajustar: ___
 - **D09 · Próxima obra** — ⭐ Abatimento (slump test, E3, fecha o laboratório) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
 - **D08 · Tom do texto** — ⭐ leigo informado (como hoje) · estudante de engenharia com fórmulas · dois níveis com botão. Ajustar: ___
 
 ## 6. Banco de ideias
+
+- Ciclo de dia e noite (postes, faróis, janelas acesas) e chuva interrompendo a concretagem.
+- Ligar a logística ao relógio das obras: a betoneira chega quando a viga está na etapa de concretagem.
+- Relatório do dia na central: m³ de concreto entregues, toneladas de aço, CPs ensaiados.
+- Clicar num pedestre ou operário e ver o que ele faz (engenheiro, armador, laboratorista).
+- Semáforos nos cruzamentos e carros parando para pedestres.
 
 - Botão "ver fórmula" em cada número da legenda.
 - Comparar duas vigas lado a lado (com e sem armadura; c/10 × c/20).
@@ -173,6 +203,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 | fps real desconhecido | medido só em renderização por software no teste; conferir no computador do usuário |
 | Textos técnicos incorretos | números gerados pelo código e pendências explícitas para o especialista |
 | Arquivo crescer demais | geometrias simples e cache de materiais; meta < 2 MB |
+| Muitos objetos animados | trânsito e pessoas simples; medir fps no computador do usuário |
 | Fontes offline | sem internet usa fontes do sistema (aparência um pouco diferente) |
 
 ## 8. Não verificado
@@ -191,5 +222,6 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.3 | 06/11/2026 | Cidade viva: trânsito, pedestres, logística entre obras, central H, gruas, placas, seguir veículo, atalhos entre obras; 19 testes |
 | v0.2 | 06/11/2026 | Obras E1 (compressão) e E2 (tração); base comum de obra; câmera por etapa; 14 testes |
 | v0.1 | 06/11/2026 | Projeto criado; cidade com 8 zonas e vinhetas; obra A1 Viga biapoiada; 8 testes |

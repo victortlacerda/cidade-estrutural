@@ -17,7 +17,7 @@ function ajustarCam(c) {
   return { ...c, alvo: [x + 0.17 * c.dist, y, z] };
 }
 
-export function criarUI(motor, cidade, obras) {
+export function criarUI(motor, cidade, obras, vida) {
   let atual = null, tour = null, arrastando = false, camManual = false;
   motor.controls.addEventListener('start', () => { camManual = true; });
 
@@ -29,13 +29,12 @@ export function criarUI(motor, cidade, obras) {
         ? `<li><button type="button" data-obra="${o.id}">${esc(o.nome)} <span class="pronta">abrir</span></button></li>`
         : `<li><span>${esc(o.nome)}</span><span class="breve">em breve</span></li>`).join('') || '<li><span>Entrada da cidade</span></li>'}</ul>
     </div>`).join('');
-  if (!celular()) $('indice').classList.remove('fechado');
   $('listaZonas').addEventListener('click', (e) => {
     const zb = e.target.closest('[data-zona]'), ob = e.target.closest('[data-obra]');
     pararTour();
     if (ob) abrir(ob.dataset.obra);
     else if (zb) { sair(); motor.voar(vistaZona(ZONAS.find((z) => z.id === zb.dataset.zona))); }
-    if (celular() || atual) fecharIndice();
+    fecharIndice();
   });
   const fecharIndice = () => { $('indice').classList.add('fechado'); $('abrirIndice').setAttribute('aria-expanded', 'false'); };
   $('abrirIndice').onclick = () => {
@@ -43,25 +42,30 @@ export function criarUI(motor, cidade, obras) {
     $('abrirIndice').setAttribute('aria-expanded', String(!f));
   };
 
-  $('btnGeral').onclick = () => { pararTour(); sair(); motor.voar(VISTA_GERAL); };
+  $('btnGeral').onclick = () => { pararTour(); sair(); vida?.pararSeguir(); motor.voar(VISTA_GERAL); };
   $('btnTema').onclick = () => { motor.aplicarTema(motor.tema === 'claro' ? 'escuro' : 'claro'); textoTema(); };
   const textoTema = () => { $('btnTema').textContent = motor.tema === 'claro' ? 'Tema escuro' : 'Tema claro'; };
   textoTema();
 
   // obra
-  function abrir(id) {
+  function abrir(id, etapa = 0) {
     const o = obras[id]; if (!o) return;
-    if (atual && atual !== o) atual.exit();
+    pararTour();
+    if (atual && atual !== o) { atual.exit(); if (cidade.vinhetas[atual.hide]) cidade.vinhetas[atual.hide].visible = true; }
     atual = o;
     if (cidade.vinhetas[o.hide]) cidade.vinhetas[o.hide].visible = false;
     o.enter();
+    if (etapa) { o.state.tc = o.starts[etapa] + 0.01; o.render(o.state.tc); }
     camManual = false;
-    motor.voar({ ...(o.camEtapa ? ajustarCam(o.camEtapa(0)) : (celular() ? o.mcam : o.cam)), dur: 2.0 });
+    if (vida) vida.emObra = true;
+    motor.voar({ ...(o.camEtapa ? ajustarCam(o.camEtapa(etapa)) : (celular() ? o.mcam : o.cam)), dur: 2.0 });
     $('obra').hidden = false; $('nota').hidden = false; $('ajuda').hidden = true;
     document.body.classList.add('em-obra'); fecharIndice();
     $('obraSub').textContent = o.sub; $('obraTit').textContent = o.tit;
     $('etapas').innerHTML = o.steps.map((s, i) => `<li><button type="button" data-passo="${i}">${esc(s.t)}</button></li>`).join('');
     ultimoPasso = -1;
+    $('ligacoes').innerHTML = (o.ligacoes || []).map((l, i) => `<button type="button" data-lig="${i}">${esc(l.texto)}</button>`).join('');
+    $('ligacoes').hidden = !(o.ligacoes || []).length;
     try { history.replaceState(null, '', '#' + id); } catch { /* sem histórico */ }
   }
   function sair() {
@@ -69,8 +73,9 @@ export function criarUI(motor, cidade, obras) {
     atual.exit();
     if (cidade.vinhetas[atual.hide]) cidade.vinhetas[atual.hide].visible = true;
     atual = null;
+    if (vida) vida.emObra = false;
     $('obra').hidden = true; $('nota').hidden = true; $('ajuda').hidden = false;
-    document.body.classList.remove('em-obra'); if (!celular()) $('indice').classList.remove('fechado');
+    document.body.classList.remove('em-obra');
     try { history.replaceState(null, '', location.pathname + location.search); } catch { /* sem histórico */ }
   }
   $('etapas').addEventListener('click', (e) => {
@@ -90,6 +95,7 @@ export function criarUI(motor, cidade, obras) {
 
   let ultimoPasso = -1, ultimaNota = '';
   function atualizar() {
+    atualizarAgora();
     if (!atual) return;
     const s = atual.state;
     if (!arrastando) linha.value = Math.round(s.tc / atual.fim * 1000);
@@ -107,6 +113,34 @@ export function criarUI(motor, cidade, obras) {
       if (celular()) $('etapas').children[s.step]?.scrollIntoView({ inline: 'center', block: 'nearest' });
     }
     if (s.note !== ultimaNota) { ultimaNota = s.note; $('nota').textContent = s.note; }
+  }
+
+  // ligações entre obras
+  $('ligacoes').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lig]'); if (!b || !atual) return;
+    const l = atual.ligacoes[+b.dataset.lig]; abrir(l.obra, l.etapa ?? 0);
+  });
+
+  // vida da cidade: placas, botões de obra, veículos, painel "Agora na cidade"
+  let ultimoEvento = null;
+  function atualizarAgora() {
+    if (!vida) return;
+    const ev = vida.eventos[0];
+    if (ev === ultimoEvento) return;
+    ultimoEvento = ev;
+    $('eventos').innerHTML = vida.eventos.slice(0, 4).map((e, i) =>
+      `<li><span>${esc(e.texto)}</span>${e.alvo ? `<button type="button" data-seguir="${i}">Seguir</button>` : ''}</li>`).join('')
+      || '<li><span>Veículos saindo para as primeiras entregas…</span></li>';
+  }
+  if (vida) {
+    vida.placas.forEach((p) => { p.el.onclick = () => { pararTour(); sair(); vida.pararSeguir(); motor.voar(vistaZona(p.zona)); }; });
+    vida.botoesObra.forEach((b) => { b.el.onclick = () => abrir(b.obra); });
+    $('eventos').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-seguir]'); if (!b) return;
+      pararTour(); vida.seguir(vida.eventos[+b.dataset.seguir].alvo);
+    });
+    vida.aoSeguir((v) => { $('seguindo').hidden = !v; if (v) $('seguindo').textContent = `Seguindo ${v.nome} · parar`; });
+    $('seguindo').onclick = () => vida.pararSeguir();
   }
 
   // tour: sobrevoa as zonas e termina dentro da obra pronta

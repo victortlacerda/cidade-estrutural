@@ -25,7 +25,27 @@ html, body { height: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--f-texto); font-size: 14px; overflow: hidden; }
 #cena { position: fixed; inset: 0; }
 #cena canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-#rotulos { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+#rotulos, #placas { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.placa { position: absolute; left: 0; top: 0; pointer-events: auto; white-space: nowrap; box-shadow: var(--sombra);
+  border-radius: 8px; padding: 6px 10px; min-height: 0; font: 500 12px/1.25 var(--f-texto); text-align: left; }
+.placa.zona { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; translate: -50% -100%; }
+.placa.zona b { grid-row: span 2; font: 700 15px/24px var(--f-titulo); width: 24px; height: 24px; text-align: center; border-radius: 5px; background: var(--fg); color: var(--bg); }
+.placa.zona .nm { font: 700 14px/1.1 var(--f-titulo); letter-spacing: 0.01em; }
+.placa.zona .at { color: var(--fg2); font-size: 11.5px; }
+.placa.zona.ativa .at { color: var(--acento); font-weight: 600; }
+.placa.veiculo { translate: -50% -100%; font-size: 11.5px; font-weight: 600; padding: 4px 8px; border-left: 3px solid var(--aco); }
+.placa.veiculo.seguindo { border-left-color: var(--acento); outline: 2px solid var(--acento); }
+.placa.obra { translate: -50% -100%; background: var(--acento); color: var(--acento-fg); border-color: transparent; font-weight: 700; padding: 6px 11px; }
+#agora { left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: 330px; padding: 10px 12px; }
+#agora h2 { font: 700 13px var(--f-titulo); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg2); margin: 0 0 6px; display: flex; justify-content: space-between; align-items: center; }
+#agora ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+#agora li { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 12.5px; line-height: 1.3; }
+#agora li:first-child { font-weight: 600; }
+#agora li button { box-shadow: none; padding: 3px 8px; min-height: 26px; font-size: 12px; flex: none; }
+#seguindo { position: fixed; left: 50%; top: calc(64px + env(safe-area-inset-top, 0px)); translate: -50% 0; background: var(--acento); color: var(--acento-fg); border-color: transparent; }
+#ligacoes { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 12px; }
+#ligacoes button { box-shadow: none; font-size: 12.5px; padding: 5px 10px; min-height: 30px; background: var(--chip); border-color: transparent; }
+#ligacoes button::before { content: "↗ "; color: var(--acento); }
 .rotulo { position: absolute; left: 0; top: 0; white-space: nowrap; font: 600 13px/1 var(--f-texto);
   padding: 5px 9px; border-radius: 6px; background: var(--painel); color: var(--fg); box-shadow: var(--sombra);
   margin: -34px 0 0 -12px; border: 1px solid var(--borda); }
@@ -81,10 +101,12 @@ button.primario { background: var(--acento); color: var(--acento-fg); border-col
 .controles button { box-shadow: none; }
 #nota { left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding: 9px 16px;
   font: 500 13px var(--f-dado); font-variant-numeric: tabular-nums; max-width: calc(100% - 32px); text-align: center; }
-#ajuda { left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding: 9px 16px; font-size: 13px; color: var(--fg2); text-align: center; max-width: calc(100% - 32px); }
-#abrirIndice { display: none; }
+#ajuda { right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding: 9px 16px; font-size: 13px; color: var(--fg2); text-align: center; max-width: calc(100% - 32px); }
+#abrirIndice { display: inline-block; }
+#indice.fechado { display: none; }
 body.em-obra #indice.fechado { display: none; }
 body.em-obra #abrirIndice { display: inline-block; }
+body.em-obra #agora { display: none; }
 @media (max-width: 860px) {
   #indice { width: auto; right: max(16px, env(safe-area-inset-right, 0px)); max-height: 55%; }
   #indice.fechado { display: none; }
@@ -96,6 +118,11 @@ body.em-obra #abrirIndice { display: inline-block; }
   #etapas button { font-size: 0; gap: 0; } #etapas button::before { font-size: 12px; }
   #texto p { font-size: 13px; }
   #nota { font-size: 11px; padding: 7px 10px; }
+  #ajuda { display: none; }
+  #seguindo { top: calc(112px + env(safe-area-inset-top, 0px)); }
+  #agora { right: max(16px, env(safe-area-inset-right, 0px)); width: auto; }
+  #agora li:not(:first-child) { display: none; }
+  .placa.zona .at { display: none; }
   .marca b { font-size: 21px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -103,6 +130,7 @@ body.em-obra #abrirIndice { display: inline-block; }
 
 <div id="cena" aria-label="Cidade em 3D"></div>
 <div id="rotulos"></div>
+<div id="placas"></div>
 
 <div class="barra">
   <div class="marca"><b>Cidade Estrutural</b><span>obras em corte, passo a passo</span></div>
@@ -124,6 +152,7 @@ body.em-obra #abrirIndice { display: inline-block; }
   </div>
   <ol id="etapas"></ol>
   <div id="texto"></div>
+  <div id="ligacoes"></div>
   <div class="controles">
     <button id="btnPlay" type="button" aria-label="Pausar">Pausar</button>
     <input id="linha" type="range" min="0" max="1000" value="0" aria-label="Linha do tempo da obra">
@@ -134,6 +163,8 @@ body.em-obra #abrirIndice { display: inline-block; }
 </section>
 
 <div id="nota" class="painel" hidden></div>
-<div id="ajuda" class="painel">Arraste para girar, role para aproximar. Escolha uma obra em <b>Zonas</b>.</div>
+<section id="agora" class="painel" aria-live="polite"><h2>Agora na cidade</h2><ol id="eventos"></ol></section>
+<button id="seguindo" type="button" hidden>Seguindo · parar</button>
+<div id="ajuda" class="painel">Arraste para girar, role para aproximar. Clique numa placa, num veículo ou num botão laranja de obra.</div>
 
 <script type="module" src="/src/main.js"></script>
