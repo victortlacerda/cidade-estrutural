@@ -1,0 +1,139 @@
+<title>Cidade Estrutural</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: cena 3D em tela cheia; índice das zonas à esquerda, ficha da obra à direita, legenda ao vivo embaixo. */
+:root {
+  --bg: #dfe5ea; --painel: rgba(247, 248, 249, 0.9); --borda: rgba(31, 42, 51, 0.12);
+  --fg: #1f2a33; --fg2: #56636e; --acento: #c8661e; --acento-fg: #ffffff; --aco: #2f63a8; --ok: #2f7d45;
+  --chip: rgba(31, 42, 51, 0.07); --sombra: 0 6px 24px rgba(20, 30, 40, 0.14);
+  --f-titulo: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-texto: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --f-dado: "JetBrains Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1b2127; --painel: rgba(30, 36, 42, 0.92); --borda: rgba(220, 230, 238, 0.12);
+  --fg: #e6ebef; --fg2: #9aa7b2; --acento: #e8873a; --acento-fg: #1b1206; --aco: #7fb0ef; --ok: #7ccc8f;
+  --chip: rgba(230, 236, 240, 0.08); --sombra: 0 6px 24px rgba(0, 0, 0, 0.4); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1b2127; --painel: rgba(30, 36, 42, 0.92); --borda: rgba(220, 230, 238, 0.12);
+  --fg: #e6ebef; --fg2: #9aa7b2; --acento: #e8873a; --acento-fg: #1b1206; --aco: #7fb0ef; --ok: #7ccc8f;
+  --chip: rgba(230, 236, 240, 0.08); --sombra: 0 6px 24px rgba(0, 0, 0, 0.4); color-scheme: dark; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-texto); font-size: 14px; overflow: hidden; }
+#cena { position: fixed; inset: 0; }
+#cena canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+#rotulos { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.rotulo { position: absolute; left: 0; top: 0; white-space: nowrap; font: 600 13px/1 var(--f-texto);
+  padding: 5px 9px; border-radius: 6px; background: var(--painel); color: var(--fg); box-shadow: var(--sombra);
+  margin: -34px 0 0 -12px; border: 1px solid var(--borda); }
+.rotulo::after { content: ""; position: absolute; left: 8px; bottom: -7px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--acento); box-shadow: 0 0 0 2px var(--painel); }
+.rotulo.destaque { border-left: 3px solid var(--acento); }
+.rotulo.discreto { font-weight: 500; color: var(--fg2); background: var(--chip); box-shadow: none; }
+.barra { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  pointer-events: none; }
+.barra > * { pointer-events: auto; }
+.marca { display: flex; flex-direction: column; line-height: 1; margin-right: auto; }
+.marca b { font: 700 26px/1 var(--f-titulo); letter-spacing: 0.01em; text-transform: uppercase; }
+.marca span { font: 500 11px/1.4 var(--f-texto); color: var(--fg2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; }
+button, select { font: 600 13px var(--f-texto); color: var(--fg); background: var(--painel); border: 1px solid var(--borda);
+  border-radius: 8px; padding: 8px 12px; cursor: pointer; box-shadow: var(--sombra); min-height: 36px; }
+button:hover { border-color: var(--acento); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+button.primario { background: var(--acento); color: var(--acento-fg); border-color: transparent; }
+.painel { position: fixed; background: var(--painel); border: 1px solid var(--borda); border-radius: 12px; box-shadow: var(--sombra);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+#indice { left: max(16px, env(safe-area-inset-left, 0px)); top: 74px; width: 268px; max-height: calc(100% - 100px); overflow: auto; padding: 14px; }
+#indice h2 { font: 700 15px var(--f-titulo); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg2); margin: 0 0 8px; }
+.zona { border-top: 1px solid var(--borda); padding: 9px 0; }
+.zona-cab { display: flex; gap: 9px; align-items: center; background: none; border: 0; box-shadow: none; padding: 2px 0; width: 100%; text-align: left; min-height: 30px; }
+.zona-cab .letra { font: 700 15px/26px var(--f-titulo); width: 26px; height: 26px; text-align: center; border-radius: 6px; background: var(--fg); color: var(--bg); flex: none; }
+.zona-cab .nome { font: 600 17px var(--f-titulo); letter-spacing: 0.01em; }
+.obras { list-style: none; margin: 4px 0 0 35px; padding: 0; display: grid; gap: 2px; }
+.obras li { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 13px; color: var(--fg2); min-height: 26px; }
+.obras button { box-shadow: none; padding: 4px 9px; min-height: 28px; font-size: 13px; width: 100%; text-align: left;
+  display: flex; justify-content: space-between; gap: 8px; border-color: transparent; background: var(--chip); }
+.obras button .pronta { font: 600 11px var(--f-texto); color: var(--ok); letter-spacing: 0.04em; text-transform: uppercase; }
+.obras .breve { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8; }
+#obra { right: max(16px, env(safe-area-inset-right, 0px)); top: 74px; width: 370px; max-height: calc(100% - 150px); display: flex; flex-direction: column; }
+#obra .cab { padding: 14px 16px 8px; }
+#obra .sub { font: 600 11px var(--f-texto); color: var(--acento); letter-spacing: 0.08em; text-transform: uppercase; }
+#obra h1 { font: 700 26px/1.05 var(--f-titulo); margin: 4px 0 0; text-wrap: balance; }
+#etapas { list-style: none; margin: 0; padding: 4px 10px; display: grid; gap: 2px; counter-reset: e; }
+#etapas button { width: 100%; text-align: left; box-shadow: none; border: 0; background: none; padding: 6px 8px; min-height: 30px;
+  display: flex; gap: 10px; align-items: center; font-weight: 500; color: var(--fg2); }
+#etapas button::before { counter-increment: e; content: counter(e); font: 500 12px var(--f-dado); width: 22px; height: 22px; line-height: 22px;
+  text-align: center; border-radius: 50%; border: 1px solid var(--borda); flex: none; }
+#etapas button[aria-current="step"] { color: var(--fg); background: var(--chip); font-weight: 600; }
+#etapas button[aria-current="step"]::before { background: var(--acento); border-color: transparent; color: var(--acento-fg); }
+#etapas button.feita::before { background: var(--chip); }
+#texto { padding: 6px 18px 12px; overflow: auto; min-height: 0; }
+#texto h3 { font: 700 18px var(--f-titulo); margin: 4px 0 6px; }
+#texto p { margin: 0; line-height: 1.55; font-size: 14px; max-width: 62ch; }
+.exemplo { margin-top: 10px; font-size: 12px; color: var(--fg2); }
+.controles { display: flex; gap: 8px; align-items: center; padding: 10px 14px 14px; border-top: 1px solid var(--borda); flex-wrap: wrap; }
+.controles input[type=range] { flex: 1 1 140px; accent-color: var(--acento); min-width: 0; }
+.controles .tempo { font: 500 12px var(--f-dado); color: var(--fg2); font-variant-numeric: tabular-nums; min-width: 84px; text-align: right; }
+.controles button { box-shadow: none; }
+#nota { left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding: 9px 16px;
+  font: 500 13px var(--f-dado); font-variant-numeric: tabular-nums; max-width: calc(100% - 32px); text-align: center; }
+#ajuda { left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding: 9px 16px; font-size: 13px; color: var(--fg2); text-align: center; max-width: calc(100% - 32px); }
+#abrirIndice { display: none; }
+body.em-obra #indice.fechado { display: none; }
+body.em-obra #abrirIndice { display: inline-block; }
+@media (max-width: 860px) {
+  #indice { width: auto; right: max(16px, env(safe-area-inset-right, 0px)); max-height: 55%; }
+  #indice.fechado { display: none; }
+  #abrirIndice { display: inline-block; }
+  #obra { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: auto; top: auto;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)); max-height: 46%; }
+  #obra #etapas { display: flex; overflow-x: auto; padding-bottom: 6px; }
+  #obra #etapas li { flex: none; }
+  #etapas button { font-size: 0; gap: 0; } #etapas button::before { font-size: 12px; }
+  #texto p { font-size: 13px; }
+  #nota { font-size: 11px; padding: 7px 10px; }
+  .marca b { font-size: 21px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="cena" aria-label="Cidade em 3D"></div>
+<div id="rotulos"></div>
+
+<div class="barra">
+  <div class="marca"><b>Cidade Estrutural</b><span>obras em corte, passo a passo</span></div>
+  <button id="abrirIndice" type="button" aria-expanded="false">Zonas</button>
+  <button id="btnGeral" type="button">Visão geral</button>
+  <button id="btnTour" type="button">Tour guiado</button>
+  <button id="btnTema" type="button" aria-label="Alternar tema claro e escuro">Tema escuro</button>
+</div>
+
+<nav id="indice" class="painel fechado" aria-label="Zonas da cidade">
+  <h2>Zonas</h2>
+  <div id="listaZonas"></div>
+</nav>
+
+<section id="obra" class="painel" hidden aria-live="polite">
+  <div class="cab">
+    <div class="sub" id="obraSub"></div>
+    <h1 id="obraTit"></h1>
+  </div>
+  <ol id="etapas"></ol>
+  <div id="texto"></div>
+  <div class="controles">
+    <button id="btnPlay" type="button" aria-label="Pausar">Pausar</button>
+    <input id="linha" type="range" min="0" max="1000" value="0" aria-label="Linha do tempo da obra">
+    <span class="tempo" id="tempo">0:00 / 0:00</span>
+    <select id="vel" aria-label="Velocidade"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+    <button id="btnSair" type="button">Sair da obra</button>
+  </div>
+</section>
+
+<div id="nota" class="painel" hidden></div>
+<div id="ajuda" class="painel">Arraste para girar, role para aproximar. Escolha uma obra em <b>Zonas</b>.</div>
+
+<script type="module" src="/src/main.js"></script>

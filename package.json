@@ -1,0 +1,16 @@
+{
+  "name": "cidade-estrutural",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cidade 3D de obras estruturais com vista em corte animada",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "test": "node --test tests/*.test.js",
+    "artifact": "vite build && node scripts/artifact.mjs"
+  },
+  "dependencies": { "three": "0.170.0" },
+  "devDependencies": { "vite": "^5.4.0", "vite-plugin-singlefile": "^2.0.0" }
+}
