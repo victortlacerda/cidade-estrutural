@@ -14,7 +14,7 @@ export function criarMotor(container) {
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xdfe5ea, 160, 420);
+  scene.fog = new THREE.Fog(0xdfe5ea, 220, 560);
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1200);
 
   const hemi = new THREE.HemisphereLight(0xffffff, 0x8a8f86, 0.75);
@@ -24,13 +24,13 @@ export function criarMotor(container) {
   sol.castShadow = true;
   sol.shadow.mapSize.set(4096, 4096);
   const sc = sol.shadow.camera;
-  sc.left = -140; sc.right = 140; sc.top = 110; sc.bottom = -110; sc.near = 10; sc.far = 400;
+  sc.left = -150; sc.right = 150; sc.top = 125; sc.bottom = -125; sc.near = 10; sc.far = 400;
   sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03;
   scene.add(sol, sol.target);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = 0.08;
-  controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 0.5; controls.maxDistance = 360;
+  controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 0.5; controls.maxDistance = 420;
 
   // Voo de câmera: alvo + distância + yaw + pitch
   let voo = null;

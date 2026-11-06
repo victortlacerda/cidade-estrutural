@@ -21,9 +21,19 @@ export const MAT = {
   bloco: 0x8f969c, agua: 0x6aa3c8, vidro: 0x9fb8c8, tijolo: 0xb2603f, branco: 0xeeeeea,
 };
 
-// Grade 4 × 2. centro em coordenadas de mundo
-const cx = (c) => (c - 1.5) * (LOTE.w + LOTE.rua);
-const cz = (r) => (r - 0.5) * (LOTE.d + LOTE.rua);
+// Mapa: rio de leste a oeste dividindo a cidade em norte (linha 0) e sul (linha 1);
+// avenida central (x = 0) com 2 × 2 faixas e canteiro, atravessando o rio por uma ponte estaiada.
+export const MAPA = {
+  rio: { meia: 18, margem: 4, agua: -4.4, fundo: -6.5 },
+  ruaW: 14, av: { meia: 13, canteiro: 1.3, faixas: [2.95, 6.25], pista: 7.9 },
+  X: [-126, -66, 0, 66, 126],      // eixos das ruas verticais (índice 2 = avenida)
+  Z: [-95, -29, 29, 95],           // externa norte, marginal norte, marginal sul, externa sul
+  pontes: [0, 66],                 // ruas verticais que atravessam o rio (avenida e ponte em vigas)
+  passarela: 36,                   // passarela em arco (pedestres), em frente à zona C
+};
+const COLS = [-96, -36, 36, 96], ROWS = [-62, 62];
+const cx = (c) => COLS[c];
+const cz = (r) => ROWS[r];
 
 export const ZONAS = [
   { id: 'A', nome: 'Concreto armado', c: 0, r: 0, obras: [
@@ -37,10 +47,10 @@ export const ZONAS = [
     { id: 'ligacao', nome: 'Ligação parafusada e soldada' },
     { id: 'portico', nome: 'Pórtico de galpão' },
   ] },
-  { id: 'C', nome: 'Pontes', c: 2, r: 0, obras: [
-    { id: 'ponte-viga', nome: 'Ponte em vigas protendidas' },
-    { id: 'arco', nome: 'Ponte em arco' },
-    { id: 'estaiada', nome: 'Ponte estaiada' },
+  { id: 'C', nome: 'Pontes e pré-moldados', c: 2, r: 0, obras: [
+    { id: 'ponte-viga', nome: 'Ponte em vigas protendidas (no rio)' },
+    { id: 'arco', nome: 'Passarela em arco (no rio)' },
+    { id: 'estaiada', nome: 'Ponte estaiada da avenida' },
   ] },
   { id: 'D', nome: 'Edifícios altos', c: 3, r: 0, obras: [
     { id: 'vento', nome: 'Vento e deslocamento lateral' },

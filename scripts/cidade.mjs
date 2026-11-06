@@ -18,9 +18,16 @@ await p.screenshot({ path: `/tmp/e/${pref}0.png` });
 await p.evaluate(() => { const a = window.__app; const z = a.cidade.vinhetas.A.parent.position; a.motor.pular({ alvo: [z.x, 2, z.z], dist: 70, yaw: 0.45, pitch: 0.6 }); });
 await avanca(8); await p.waitForTimeout(2000);
 await p.screenshot({ path: `/tmp/e/${pref}1.png` });
-await p.evaluate(() => { const a = window.__app; a.vida.seguir(a.vida.logistica[1]); a.motor.atualizarVoo(5); });
-await avanca(6); await p.evaluate(() => window.__app.motor.atualizarVoo(5)); await p.waitForTimeout(2000);
-await p.screenshot({ path: `/tmp/e/${pref}2.png` });
+const vistas = [
+  { alvo: [36, 0, -6], dist: 95, yaw: 0.55, pitch: 0.5 },     // rio, pontes e zona C
+  { alvo: [12, 6, 0], dist: 62, yaw: 1.05, pitch: 0.22 },     // estaiada e ponte em vigas, rente à água
+  { alvo: [36, 3, 0], dist: 34, yaw: -0.9, pitch: 0.25 },     // passarela em arco
+];
+for (let i = 0; i < vistas.length; i++) {
+  await p.evaluate((v) => window.__app.motor.pular(v), vistas[i]);
+  await avanca(4); await p.waitForTimeout(1800);
+  await p.screenshot({ path: `/tmp/e/${pref}${i + 2}.png` });
+}
 const ev = await p.evaluate(() => window.__app.vida.eventos.map((e) => e.texto));
 console.log(ev.join('\n'));
 console.log(erros.length ? 'ERROS:\n' + erros.join('\n') : 'sem erros');

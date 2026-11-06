@@ -2,9 +2,9 @@
 // (betoneira da central para a viga, carreta de aço, van de corpos de prova para o laboratório).
 // É ambiente contínuo (não segue o relógio das obras).
 import * as THREE from 'three';
-import { ZONAS, LOTE, MAT, zona } from './config.js';
+import { ZONAS, LOTE, MAT, MAPA, zona } from './config.js';
 import { box, cyl, at, mat, pessoa, andar, rng, clamp, lerp } from './core/kit.js';
-import { NOS, ENTRADA, rota, naFaixa, passeio, polilinha } from './core/malha.js';
+import { NOS, ENTRADA, FAIXA, rota, naFaixa, passeio, polilinha } from './core/malha.js';
 
 const CORES_CARRO = [0xd24b3e, 0x3b6fb6, 0xeeeeea, 0x2f3a46, 0xe0a33a, 0x5c8f63, 0x8d99a3, 0x6b4f8a];
 
@@ -102,27 +102,28 @@ export function criarVida(motor, cidade) {
   function novoTrecho(c) {
     const p = passeio(c.rnd, c.ultimo, c.penultimo, 6);
     c.ultimo = p.ultimo; c.penultimo = p.penultimo;
-    c.trecho = polilinha(naFaixa(p.seq.map((id) => NOS[id])));
+    c.trecho = polilinha(naFaixa(p.seq.map((id) => NOS[id]), FAIXA, c.pista));
     c.s = 0;
   }
-  for (let k = 0; k < 18; k++) {
+  for (let k = 0; k < 24; k++) {
     const onibus = k < 2;
     const g = sombra(onibus ? MODELOS.onibus() : MODELOS.carro(CORES_CARRO[k % CORES_CARRO.length]));
     raiz.add(g);
     const a = ids[Math.floor(rnd() * ids.length)];
-    const c = { g, rnd: rng(100 + k), ultimo: a, penultimo: null, v: onibus ? 7 : 9 + rnd() * 5, onibus };
+    const c = { g, rnd: rng(100 + k), ultimo: a, penultimo: null, v: onibus ? 7 : 9 + rnd() * 5, onibus, pista: onibus || k % 2 ? 1 : 0 };
     novoTrecho(c); c.s = rnd() * c.trecho.total * 0.8;
     carros.push(c);
   }
 
   // ---------- logística entre as obras ----------
-  const ponto = (zid, dx, dz) => { const z = zona(zid); return [z.x + dx, z.z + dz]; };
+  // dz positivo = para o lado do rio (no norte é +z, no sul é −z)
+  const ponto = (zid, dx, dz) => { const z = zona(zid); return [z.x + dx, z.z + (z.r === 0 ? dz : -dz)]; };
   const VAGA = {   // onde cada veículo estaciona dentro do lote
-    A: ponto('A', 13, 17), B: ponto('B', 12, 15), C: ponto('C', -15, 17), E: ponto('E', -2, 19), H: ponto('H', 4, 8),
+    A: ponto('A', 13, 17), B: ponto('B', 12, 15), C: ponto('C', 14, 21), E: ponto('E', -2, 19), H: ponto('H', 4, 8),
   };
   const LOG = [
     { id: 'betoneira', nome: 'Betoneira', modelo: 'betoneira', v: 8, viagens: [
-      { de: 'H', para: 'A', espera: 16, ida: 'Betoneira saiu da central com concreto C25 para a viga (A)', chegada: 'Betoneira descarregando concreto na viga (A)', estado: 'C25 → Viga (A)' },
+      { de: 'H', para: 'A', espera: 16, ida: 'Betoneira sai da central (H) e cruza a ponte estaiada com C25 para a viga (A)', chegada: 'Betoneira descarregando concreto na viga (A)', estado: 'C25 → Viga (A)' },
       { de: 'A', para: 'H', espera: 10, ida: 'Betoneira vazia voltando à central (H)', chegada: 'Central carregando a betoneira', estado: 'voltando à central' },
     ] },
     { id: 'van', nome: 'Van do laboratório', modelo: 'van', v: 10, viagens: [
@@ -136,7 +137,7 @@ export function criarVida(motor, cidade) {
       { de: 'B', para: 'H', espera: 10, ida: 'Carreta volta ao depósito de aço (H)', chegada: 'Carreta carregando aço no depósito (H)', estado: 'voltando ao depósito' },
     ] },
     { id: 'basculante', nome: 'Caminhão basculante', modelo: 'basculante', v: 8, viagens: [
-      { de: 'H', para: 'C', espera: 12, ida: 'Basculante leva brita da central (H) para as pontes (C)', chegada: 'Basculante descarregando brita nas pontes (C)', estado: 'brita → Pontes (C)' },
+      { de: 'H', para: 'C', espera: 12, ida: 'Basculante cruza a ponte estaiada levando brita para o pátio de pré-moldados (C)', chegada: 'Brita descarregada no pátio de pré-moldados (C)', estado: 'brita → Pré-moldados (C)' },
       { de: 'C', para: 'H', espera: 10, ida: 'Basculante volta à central (H)', chegada: 'Basculante carregando agregados (H)', estado: 'voltando à central' },
     ] },
   ];
@@ -170,7 +171,7 @@ export function criarVida(motor, cidade) {
         L.g.rotation.y = Math.atan2(-p.dz, p.dx);
         if (L.g.userData.tambor) L.g.userData.tambor.rotation.x += dt * 3;
         if (L.s >= L.trecho.total) {
-          L.fase = 'parado'; L.espera = v.espera; L.estado = v.chegada.replace(/ \([A-H]\)$/, '');
+          L.fase = 'parado'; L.espera = v.espera; L.estado = v.chegada.replace(/ \([A-H]\)$/, '').replace(new RegExp('^' + L.nome.split(' ')[0] + ' ', 'i'), '');
           avisar(v.chegada, L);
           ocupado[v.para] = { texto: curto(v.chegada), ate: relogio + v.espera };
           L.k = (L.k + 1) % L.viagens.length;
@@ -229,16 +230,31 @@ export function criarVida(motor, cidade) {
     const raio = G.lanca * (0.45 + 0.25 * Math.sin(t * 0.2 + i)), desce = 6 + 4 * Math.sin(t * 0.3 + i);
     G.carga.position.set(raio - 4, -desce, 0); G.cabo.position.set(raio - 4, -desce / 2 + 0.3, 0); G.cabo.scale.y = desce - 0.4;
   }));
-  // carros nas pontes (zona C)
-  const deques = [[3.05, -14], [6.65, 0], [3.25, 14]];
-  deques.forEach(([y, z], i) => [0, 1].forEach((k) => {
-    const c = sombra(MODELOS.carro(CORES_CARRO[(i * 2 + k) % CORES_CARRO.length])); c.scale.setScalar(0.85); V.C.add(c);
+  // pátio de pré-moldados (zona C): pórtico rolante corre nos trilhos e o carro iça a viga
+  const port = V.C.userData.portico, carroP = V.C.userData.carroPortico;
+  animados.push((t) => { port.position.x = Math.sin(t * 0.09) * 14; carroP.position.z = -7 + Math.sin(t * 0.21) * 8; });
+  // barcos no rio, passando por baixo das pontes
+  [[-1, 5, 3.2, 0xd24b3e], [1, -5, 2.6, 0x2f7d6b], [1, 5, 2.2, 0xe0a33a]].forEach(([sent, z, v, cor], i) => {
+    const b = new THREE.Group();
+    b.add(at(box(9, 1.1, 3.2, cor), 0, 0.55, 0));
+    b.add(at(box(3, 1.4, 2.4, 0xeeeeea), -2, 1.8, 0));
+    b.add(at(box(2.2, 0.5, 2.6, 0x8b5a3c), 2.2, 1.3, 0));
+    sombra(b); raiz.add(b);
     animados.push((t) => {
-      const u = ((t * 0.08 + i * 0.3 + k * 0.5) % 1), ida = k === 0;
-      const x = ida ? lerp(-11, 11, u) : lerp(11, -11, u);
-      c.position.set(x, y + 0.25, z + (ida ? 0.8 : -0.8)); c.rotation.y = ida ? 0 : Math.PI;
+      const L = 680, x = ((t * v + i * 230) % L) - L / 2;
+      b.position.set(sent * x, MAPA.rio.agua - 0.35 + Math.sin(t * 1.3 + i) * 0.05, z);
+      b.rotation.y = sent > 0 ? 0 : Math.PI;
     });
-  }));
+  });
+  // pedestres atravessando a passarela em arco
+  for (let k = 0; k < 5; k++) {
+    const p = pessoa(CAMISAS[k % CAMISAS.length], k % 2 ? MAT.pele : MAT.pele2); p.upper.children[2].visible = false; raiz.add(p.group);
+    animados.push((t) => {
+      const u = ((t * 0.035 + k * 0.21) % 1), ida = k % 2 === 0, w = MAPA.rio.meia + 3;
+      const z = ida ? lerp(-w, w, u) : lerp(w, -w, u);
+      p.group.position.set(MAPA.passarela + (ida ? 0.8 : -0.8), 0.35, z); p.group.rotation.y = ida ? 0 : Math.PI; andar(p, t * 6.5 + k, 0.45);
+    });
+  }
   // elevadores nos prédios (zona D)
   [[-9, -6, 12], [9, 8, 8]].forEach(([x, z, n], i) => {
     const cab = at(box(1.1, 2.4, 0.3, 0xe0a33a, { e: 0.25 }), x, 1.4, z + 1.3); V.D.add(cab);
@@ -262,7 +278,7 @@ export function criarVida(motor, cidade) {
     e.zona = z; return e;
   });
   const ATIV = {
-    A: 'viga, pilar, laje e sapata em execução', B: 'montagem da treliça e do pórtico', C: 'tráfego nas pontes',
+    A: 'viga, pilar, laje e sapata em execução', B: 'montagem da treliça e do pórtico', C: 'vigas pré-moldadas · 3 pontes no rio',
     D: 'grua içando · elevadores rodando', E: 'ensaios do dia', F: 'escoramento e reparo', G: 'telhado e alvenaria', H: 'abastecendo as obras',
   };
   const botoesObra = [];
@@ -320,7 +336,7 @@ export function criarVida(motor, cidade) {
       c.s += c.v * dt;
       if (c.s >= c.trecho.total) novoTrecho(c);
       const p = c.trecho.em(c.s);
-      c.g.position.set(p.x, 0.02, p.z);
+      c.g.position.set(p.x, 0.08, p.z);
       c.g.rotation.y = Math.atan2(-p.dz, p.dx);
     }
     atualizarLogistica(dt);

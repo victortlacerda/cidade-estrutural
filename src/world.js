@@ -1,6 +1,6 @@
 // A cidade: chão, ruas, lotes, placas de zona e vinhetas (miniaturas) das obras.
 import * as THREE from 'three';
-import { LOTE, ZONAS, CORES, MAT } from './config.js';
+import { LOTE, ZONAS, CORES, MAT, MAPA } from './config.js';
 import { box, cyl, at, mat, placa, pessoa } from './core/kit.js';
 
 export function criarCidade(motor) {
@@ -19,32 +19,64 @@ export function criarCidade(motor) {
     faixaMat.color.set(c.faixa); calcMat.color.set(c.calcada); arvMat.color.set(c.arvore);
   });
 
-  const chao = new THREE.Mesh(new THREE.PlaneGeometry(600, 400), chaoMat);
-  chao.rotation.x = -Math.PI / 2; chao.position.y = -0.02; chao.receiveShadow = true;
-  raiz.add(chao);
+  const plano = (w, d, m, x, y, z) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m); p.rotation.x = -Math.PI / 2; p.position.set(x, y, z); p.receiveShadow = true; raiz.add(p); return p; };
+  const R = MAPA.rio, AV = MAPA.av, LW = MAPA.ruaW - 3;
+  const ZMIN = MAPA.Z[0] - 7, ZMAX = MAPA.Z[3] + 7, XMIN = MAPA.X[0] - 7, XMAX = MAPA.X[4] + 7;
 
-  // Ruas: verticais entre colunas e horizontais entre linhas, mais o anel externo
-  const passoX = LOTE.w + LOTE.rua, passoZ = LOTE.d + LOTE.rua;
-  const W = 4 * passoX + LOTE.rua, D = 2 * passoZ + LOTE.rua;
-  for (let i = 0; i <= 4; i++) {
-    const x = (i - 2) * passoX;
-    const r = new THREE.Mesh(new THREE.PlaneGeometry(LOTE.rua - 3, D), ruaMat);
-    r.rotation.x = -Math.PI / 2; r.position.set(x, 0, 0); r.receiveShadow = true; raiz.add(r);
-    for (let k = -D / 2 + 3; k < D / 2; k += 6) {
-      const f = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 2.6), faixaMat);
-      f.rotation.x = -Math.PI / 2; f.position.set(x, 0.01, k); raiz.add(f);
-    }
-  }
-  for (let j = 0; j <= 2; j++) {
-    const z = (j - 1) * passoZ;
-    const r = new THREE.Mesh(new THREE.PlaneGeometry(W, LOTE.rua - 3), ruaMat);
-    r.rotation.x = -Math.PI / 2; r.position.set(0, 0.005, z); r.receiveShadow = true; raiz.add(r);
-    for (let k = -W / 2 + 3; k < W / 2; k += 6) {
-      const f = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.25), faixaMat);
-      f.rotation.x = -Math.PI / 2; f.position.set(k, 0.015, z); raiz.add(f);
-    }
-  }
+  // chão das duas margens (o rio fica no meio, em canal)
+  [-1, 1].forEach((s) => plano(760, 300, chaoMat, 0, -0.02, s * (R.meia + 150)));
 
+  // rio: leito, água, cais e calçadão com guarda-corpo
+  const aguaMat = new THREE.MeshStandardMaterial({ color: 0x4f8fb8, roughness: 0.25, metalness: 0.1, transparent: true, opacity: 0.88 });
+  motor.aoTema((t) => aguaMat.color.set(t === 'claro' ? 0x4f8fb8 : 0x24506e));
+  raiz.add(at(box(760, 0.3, R.meia * 2, 0x6b6556, { sombra: false }), 0, R.fundo, 0));
+  const agua = plano(760, R.meia * 2, aguaMat, 0, R.agua, 0); agua.name = 'agua';
+  [-1, 1].forEach((s) => {
+    raiz.add(at(box(760, -R.fundo + 0.1, 0.8, 0xa9a69e), 0, R.fundo / 2, s * (R.meia + 0.4)));
+    plano(760, R.margem - 0.8, calcMat, 0, 0.02, s * (R.meia + 0.8 + (R.margem - 0.8) / 2));
+    raiz.add(at(box(760, 0.08, 0.08, 0x56677a, { sombra: false }), 0, 1.0, s * (R.meia + 0.9)));
+    for (let x = -370; x <= 370; x += 4) raiz.add(at(box(0.08, 1.0, 0.08, 0x56677a, { sombra: false }), x, 0.5, s * (R.meia + 0.9)));
+  });
+
+  // ruas horizontais (externas e marginais)
+  MAPA.Z.forEach((z, j) => {
+    plano(XMAX - XMIN + 14, LW, ruaMat, 0, 0.006, z);
+    for (let k = XMIN; k < XMAX; k += 6) if (Math.abs(k) > AV.meia + 1) plano(2.6, 0.25, faixaMat, k, 0.016, z);
+  });
+  // ruas verticais comuns (sem a avenida); as que têm ponte continuam sobre o rio
+  MAPA.X.forEach((x) => {
+    if (x === 0) return;
+    const temPonte = MAPA.pontes.includes(x);
+    const trechos = temPonte ? [[ZMIN, ZMAX]] : [[ZMIN, MAPA.Z[1]], [MAPA.Z[2], ZMAX]];
+    for (const [z0, z1] of trechos) {
+      const meio = (z0 + z1) / 2, len = z1 - z0;
+      if (!temPonte) plano(LW, len, ruaMat, x, 0.004, meio);
+      else { plano(LW, MAPA.Z[1] - ZMIN, ruaMat, x, 0.004, (ZMIN + MAPA.Z[1]) / 2 - 0); plano(LW, ZMAX - MAPA.Z[2], ruaMat, x, 0.004, (ZMAX + MAPA.Z[2]) / 2); plano(LW, (MAPA.Z[2] - MAPA.Z[1]), ruaMat, x, 0.09, 0); }
+      for (let k = z0; k < z1; k += 6) if (!MAPA.Z.some((zz) => Math.abs(zz - k) < 7)) plano(0.25, 2.6, faixaMat, x, Math.abs(k) < R.meia + R.margem ? 0.1 : 0.014, k);
+    }
+  });
+  // avenida central: duas pistas de 2 faixas, canteiro com árvores, calçadas largas
+  const verdeMat = new THREE.MeshStandardMaterial({ color: 0x86a36f, roughness: 1, flatShading: true });
+  motor.aoTema((t) => verdeMat.color.set(t === 'claro' ? 0x86a36f : 0x415637));
+  const larg = AV.pista - AV.canteiro;
+  [-1, 1].forEach((s) => {
+    const xc = s * (AV.canteiro + larg / 2);
+    [[ZMIN, -R.meia - R.margem], [R.meia + R.margem, ZMAX]].forEach(([z0, z1]) => plano(larg, z1 - z0, ruaMat, xc, 0.008, (z0 + z1) / 2));
+    plano(larg, (R.meia + R.margem) * 2, ruaMat, xc, 0.09, 0);
+    plano(AV.meia - AV.pista, ZMAX - ZMIN, calcMat, s * (AV.pista + (AV.meia - AV.pista) / 2), 0.03, 0);
+    for (let k = ZMIN; k < ZMAX; k += 6) if (!MAPA.Z.some((zz) => Math.abs(zz - k) < 7)) {
+      const y = Math.abs(k) < R.meia + R.margem ? 0.1 : 0.018;
+      plano(0.25, 2.6, faixaMat, xc, y, k);
+    }
+    [AV.canteiro + 0.15, AV.pista - 0.15].forEach((xl) => plano(0.18, ZMAX - ZMIN, faixaMat, s * xl, 0.1, 0));
+  });
+  [[ZMIN, -R.meia - R.margem], [R.meia + R.margem, ZMAX]].forEach(([z0, z1]) => {
+    const c = box(AV.canteiro * 2, 0.22, z1 - z0, 0xb9b8b1); c.position.set(0, 0.11, (z0 + z1) / 2); raiz.add(c);
+    plano(AV.canteiro * 2 - 0.4, z1 - z0 - 0.4, verdeMat, 0, 0.225, (z0 + z1) / 2);
+    for (let z = z0 + 6; z < z1 - 3; z += 12) if (!MAPA.Z.some((zz) => Math.abs(zz - z) < 8)) arvore(raiz, 0, z, arvMat, 0.8);
+  });
+
+  criarPontes(raiz);
   const vinhetas = {};
   for (const zn of ZONAS) {
     const g = new THREE.Group(); g.position.set(zn.x, 0, zn.z); raiz.add(g);
@@ -52,7 +84,7 @@ export function criarCidade(motor) {
     calc.position.y = 0.07; calc.receiveShadow = true; g.add(calc);
     const lote = new THREE.Mesh(new THREE.BoxGeometry(LOTE.w, 0.1, LOTE.d), loteMat);
     lote.position.y = 0.15; lote.receiveShadow = true; g.add(lote);
-    const pl = placa(zn.id, zn.nome); pl.position.set(-LOTE.w / 2 + 6, 0.2, LOTE.d / 2 - 2); g.add(pl);
+    const pl = placa(zn.id, zn.nome); pl.position.set(-LOTE.w / 2 + 6, 0.2, (zn.r === 0 ? 1 : -1) * (LOTE.d / 2 - 2)); g.add(pl);
     const vin = new THREE.Group(); vin.name = 'vin-' + zn.id; vin.position.y = 0.2; g.add(vin);
     VINHETAS[zn.id]?.(vin);
     vinhetas[zn.id] = vin;
@@ -60,6 +92,58 @@ export function criarCidade(motor) {
     [[-1, -1], [1, -1], [1, 1]].forEach(([sx, sz], i) => arvore(g, sx * (LOTE.w / 2 - 2.5), sz * (LOTE.d / 2 - 2.5), arvMat, 1 + (i % 2) * 0.3));
   }
   return { raiz, vinhetas };
+}
+
+// ---------- as três pontes sobre o rio ----------
+function criarPontes(raiz) {
+  const R = MAPA.rio, C = MAT;
+  const vao = (R.meia + R.margem) * 2;
+  // 1) estaiada da avenida (x = 0): tabuleiro único, mastro no meio do rio, leque de estais no canteiro
+  const est = new THREE.Group(); est.name = 'ponte-estaiada'; raiz.add(est);
+  est.add(at(box(MAPA.av.pista * 2 + 1.2, 1.4, vao, C.concreto), 0, -0.64, 0));
+  est.add(at(box(4.5, -R.fundo, 6, C.pilar), 0, R.fundo / 2, 0));
+  const H = 34;
+  est.add(at(box(2.0, H, 2.8, 0xd7d5ce), 0, H / 2, 0));
+  est.add(at(box(2.4, 1.2, 3.2, 0xb9b8b1), 0, H + 0.6, 0));
+  for (let k = 1; k <= 7; k++) [-1, 1].forEach((s) => {
+    const a = new THREE.Vector3(0, H - 1.5 - k * 1.6, s * 1.2), b = new THREE.Vector3(0, 0.35, s * k * 3.0);
+    const d = new THREE.Vector3().subVectors(b, a);
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, d.length(), 5), mat(0xeeeeea));
+    c.position.copy(a).addScaledVector(d, 0.5); c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); est.add(c);
+  });
+  [-1, 1].forEach((s) => est.add(at(box(0.25, 1.1, vao, 0x8d99a3), s * (MAPA.av.pista + 0.5), 0.6, 0)));
+  est.add(at(box(MAPA.av.canteiro * 2, 0.3, vao, 0xb9b8b1), 0, 0.2, 0));
+
+  // 2) ponte em vigas protendidas (x = 66): 4 longarinas sobre 2 pilares-parede no rio
+  const xv = MAPA.pontes[1];
+  const pv = new THREE.Group(); pv.name = 'ponte-vigas'; raiz.add(pv);
+  pv.add(at(box(12, 0.35, vao, C.concreto), xv, -0.12, 0));
+  [-4.5, -1.5, 1.5, 4.5].forEach((dx) => {
+    pv.add(at(box(0.3, 1.5, vao, 0xb0afa8), xv + dx, -1.05, 0));
+    pv.add(at(box(0.9, 0.25, vao, 0xb0afa8), xv + dx, -1.85, 0));
+  });
+  [-8, 8].forEach((z) => {
+    pv.add(at(box(9, -R.fundo - 2.0, 1.0, C.pilar), xv, (R.fundo - 2.0) / 2, z));
+    pv.add(at(box(12.4, 0.6, 1.6, C.pilar), xv, -2.3, z));
+  });
+  [-1, 1].forEach((s) => pv.add(at(box(0.25, 1.0, vao, 0x8d99a3), xv + s * 5.9, 0.55, 0)));
+
+  // 3) passarela em arco atirantado (x = 36): tabuleiro de pedestres pendurado em dois arcos
+  const xa = MAPA.passarela;
+  const pa = new THREE.Group(); pa.name = 'passarela-arco'; raiz.add(pa);
+  pa.add(at(box(4, 0.3, vao, 0xc9c7c0), xa, 0.2, 0));
+  [-1, 1].forEach((s) => pa.add(at(box(0.08, 1.0, vao, 0x56677a), xa + s * 1.9, 0.85, 0)));
+  const L = 38, F = 9, N = 18;
+  const arco = (z) => F * (1 - (2 * z / L) ** 2);
+  [-1.9, 1.9].forEach((dx) => {
+    for (let i = 0; i < N; i++) {
+      const z0 = -L / 2 + i * L / N, z1 = z0 + L / N, y0 = arco(z0) + 0.35, y1 = arco(z1) + 0.35;
+      const sg = box(0.35, 0.5, Math.hypot(z1 - z0, y1 - y0) + 0.05, 0xe07b2a);
+      sg.position.set(xa + dx, (y0 + y1) / 2, (z0 + z1) / 2); sg.rotation.x = -Math.atan2(y1 - y0, z1 - z0); pa.add(sg);
+    }
+    for (let z = -L / 2 + 2.5; z < L / 2 - 1; z += 2.5) pa.add(at(box(0.05, arco(z), 0.05, 0xd9d9d0), xa + dx, 0.35 + arco(z) / 2, z));
+  });
+  [-6, 0, 6].forEach((z) => pa.add(at(box(3.8, 0.25, 0.25, 0xe07b2a), xa, arco(z) + 0.35, z)));
 }
 
 function arvore(g, x, z, m, s = 1) {
@@ -122,25 +206,38 @@ const VINHETAS = {
     g.add(at(box(0.05, 0.6, 0.5, 0x9aa7b1), 14.18, 2.6, -2));
   },
   C(g) {
-    // rio raso atravessando o lote
-    g.add(at(box(46, 0.06, 7, C.agua, { sombra: false, r: 0.3 }), 0, 0.02, 0));
-    // ponte em vigas
-    [-9, -3, 3, 9].forEach((x) => g.add(at(box(0.8, 2.4, 0.8, C.pilar), x, 1.2, -14)));
-    g.add(at(box(22, 0.7, 4, C.concreto), 0, 2.7, -14));
-    // arco
-    for (let i = 0; i < 18; i++) {
-      const a = Math.PI * (i + 0.5) / 18, x = -9 * Math.cos(a), y = 6 * Math.sin(a);
-      const s = box(1.7, 0.5, 2.4, C.concreto); s.position.set(x, y, 0); s.rotation.z = a - Math.PI / 2; g.add(s);
+    // pátio de vigas pré-moldadas protendidas (as vigas da ponte do rio saem daqui)
+    const sinal = 1;   // lado do rio (+z)
+    for (let k = 0; k < 3; k++) {
+      const z = -14 + k * 7;
+      g.add(at(box(34, 0.4, 2.2, 0xa9a69e), -2, 0.2, z));                     // pista de protensão
+      [-19.5, 15.5].forEach((x) => g.add(at(box(1.2, 1.6, 2.4, 0x6f7c86), x, 0.8, z))); // cabeceiras de ancoragem
+      if (k < 2) {  // viga em I pronta na pista
+        g.add(at(box(30, 0.25, 0.9, 0xc9c7c0), -2, 0.55, z));
+        g.add(at(box(30, 1.1, 0.22, 0xc9c7c0), -2, 1.2, z));
+        g.add(at(box(30, 0.22, 0.7, 0xc9c7c0), -2, 1.86, z));
+      } else {      // fôrma metálica com cordoalhas esticadas
+        g.add(at(box(30, 1.6, 0.06, 0x8d99a3), -2, 1.2, z - 0.5));
+        for (let c = 0; c < 6; c++) g.add(at(box(34, 0.03, 0.03, 0x2b2b2b, { sombra: false }), -2, 0.6 + (c % 3) * 0.1, z - 0.2 + Math.floor(c / 3) * 0.4));
+      }
     }
-    g.add(at(box(22, 0.5, 3.4, C.concreto), 0, 6.4, 0));
-    // estaiada
-    g.add(at(box(22, 0.5, 3.4, C.concreto), 0, 3, 14));
-    g.add(at(box(0.9, 12, 0.9, C.pilar), 0, 6, 14));
-    for (let i = 1; i <= 5; i++) [-1, 1].forEach((s) => {
-      const x = s * i * 1.9, L = Math.hypot(x, 11.5 - 3.3);
-      const c = box(0.06, L, 0.06, 0xd9d9d0); c.position.set(x / 2, (11.5 + 3.3) / 2, 14);
-      c.rotation.z = Math.atan2(x, 11.5 - 3.3); g.add(c);
+    // estoque de vigas e caminhão de transporte
+    for (let i = 0; i < 3; i++) g.add(at(box(30, 1.8, 0.8, 0xc9c7c0), -2, 0.9, 10 + i * 1.2));
+    g.add(at(box(0.6, 0.5, 4.4, 0x5c3b22), -14, 0.25, 11.2)); g.add(at(box(0.6, 0.5, 4.4, 0x5c3b22), 10, 0.25, 11.2));
+    // pórtico rolante sobre trilhos (anima em vida.js)
+    [-1, 1].forEach((s) => g.add(at(box(40, 0.15, 0.3, 0x56677a), -2, 0.08, -7 + s * 11)));
+    const portico = new THREE.Group(); portico.name = 'portico'; g.add(portico);
+    [-1, 1].forEach((s) => {
+      portico.add(at(box(0.6, 7.5, 0.6, 0xe0b021), 0, 3.75, -7 + s * 11));
+      portico.add(at(box(1.6, 0.5, 1.2, 0xe0b021), 0, 0.3, -7 + s * 11));
     });
+    portico.add(at(box(0.9, 1.0, 23, 0xe0b021), 0, 7.8, -7));
+    const carro = new THREE.Group(); carro.name = 'carro'; portico.add(carro);
+    carro.add(at(box(1.4, 0.8, 1.4, 0x40546a), 0, 7.0, 0));
+    carro.add(at(box(0.05, 3.2, 0.05, 0x2b2b2b), 0, 5.0, 0));
+    carro.add(at(box(0.6, 0.3, 2.4, 0x6f7c86), 0, 3.3, 0));
+    g.userData.portico = portico; g.userData.carroPortico = carro;
+    void sinal;
   },
   D(g) {
     const torre = (x, z, n, cor) => {

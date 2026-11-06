@@ -1,12 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { NOS, VIZ, ENTRADA, rota, naFaixa, passeio, polilinha, FAIXA } from '../src/core/malha.js';
+import { NOS, VIZ, ENTRADA, rota, naFaixa, passeio, polilinha, FAIXA, FAIXAS_AV } from '../src/core/malha.js';
 import { rng } from '../src/core/kit.js';
 
-test('malha 5 × 3 com vizinhos', () => {
-  assert.equal(Object.keys(NOS).length, 15);
+test('malha 5 × 4; norte e sul ligados só pelas pontes', () => {
+  assert.equal(Object.keys(NOS).length, 20);
   assert.equal(VIZ.n00.length, 2);
-  assert.equal(VIZ.n21.length, 4);
+  assert.equal(VIZ.n21.length, 4);                 // avenida na marginal norte: tem ponte
+  assert.equal(VIZ.n11.length, 3);                 // rua sem ponte termina no rio
+  const pontes = Object.keys(NOS).filter((k) => k[2] === '1' && VIZ[k].some((v) => v[2] === '2'));
+  assert.deepEqual(pontes.sort(), ['n21', 'n31']);
+});
+test('avenida usa faixas da avenida', () => {
+  const f = naFaixa([[0, -29], [0, 29]], 2.2, 1);
+  assert.equal(Math.abs(f[0][0]), FAIXAS_AV[1]);
 });
 test('toda zona tem rota para toda outra, começando e terminando nas entradas', () => {
   const ids = Object.keys(ENTRADA);
@@ -25,7 +32,7 @@ test('faixa da direita: indo para +x fica em +z', () => {
   assert.deepEqual(c[1], [10 - FAIXA, FAIXA]);
 });
 test('passeio não volta para trás fora de ponta de rua', () => {
-  const p = passeio(rng(3), 'n21', 'n11', 30);
+  const p = passeio(rng(3), 'n21', 'n11', 40);
   for (let k = 2; k < p.seq.length; k++) if (VIZ[p.seq[k - 1]].length > 1) assert.notEqual(p.seq[k], p.seq[k - 2]);
 });
 test('polilinha mede e amostra', () => {

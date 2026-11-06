@@ -1,12 +1,29 @@
 # Cidade Estrutural — Roadmap
 
-**Versão v0.3 · 06/11/2026**
+**Versão v0.4 · 06/11/2026**
 
 Um mundo 3D navegável no navegador em que cada lote é uma zona temática de engenharia estrutural, e cada obra tem uma sequência animada em vista em corte: do canteiro (fôrma, armadura, concretagem) até o comportamento estrutural (esforços, tensões, fissuras, flecha), com números calculados em código e o texto escrito a partir deles.
 
 Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte com painéis planares), do Showroom 3D (regras puras testadas antes da cena) e da Arena (roadmap vivo, decisões numeradas, arquivo único que abre por duplo clique).
 
-## O que mudou nesta rodada (v0.3) — cidade viva
+## O que mudou nesta rodada (v0.4) — rio, avenida e pontes
+
+Pedido do usuário: avenida central principal com mais faixas, rio dividindo a cidade em duas partes, ponte unindo os lados e uma zona C Pontes melhor e mais ilustrativa.
+
+- **Rio** de leste a oeste em canal de 36 m, com cais de concreto, calçadão e guarda-corpo. Norte: zonas A–D; sul: E–H.
+- **Avenida central** (x = 0) com 2 × 2 faixas de 3,3 m, canteiro arborizado e calçadas largas. Os carros escolhem a faixa da esquerda ou da direita.
+- **Marginais** dos dois lados do rio; as entradas dos lotes agora ficam voltadas para o rio.
+- **Três pontes reais** sobre o rio:
+  - estaiada da avenida: mastro de 34 m no meio do rio e leque de estais no canteiro;
+  - ponte em vigas protendidas (x = 66): 4 longarinas sobre 2 pilares-parede, com trânsito;
+  - passarela em arco atirantado (x = 36): arcos de 9 m, pendurais e pedestres atravessando.
+- Norte e sul se ligam só pelas duas pontes de veículos. A logística da central (sul) cruza a estaiada para chegar à viga (norte).
+- **Zona C** virou "Pontes e pré-moldados": pistas de protensão, vigas I prontas, estoque e pórtico rolante animado.
+- Barcos navegam pelo rio passando por baixo das pontes.
+- O tour passa pelo rio, e a placa C enquadra as pontes.
+- Malha viária com 20 cruzamentos; testes garantem que norte e sul só se ligam pelas pontes (20 testes no total).
+
+## Rodada anterior (v0.3) — cidade viva
 
 Pedido do usuário: "está meio sem vida, não parece uma cidade dinâmica com interação entre as obras".
 
@@ -51,13 +68,13 @@ Pedido do usuário: "está meio sem vida, não parece uma cidade dinâmica com i
 - A animação é sempre função do tempo `t`; nada acumulado que não se recalcule de `t`.
 - Texto e gráfico sempre concordam: o texto é gerado a partir dos números do cálculo.
 
-## 2. Mapa da cidade (grade 4 × 2, lotes 46 × 52 m)
+## 2. Mapa da cidade (4 lotes por margem, lotes 46 × 52 m, rio no meio)
 
 | Zona | Tema | Obras |
 |---|---|---|
 | A | Concreto armado | [x] Viga biapoiada · [ ] Pilar e flambagem · [ ] Laje maciça e nervurada · [ ] Sapata isolada |
 | B | Estruturas de aço | [ ] Treliça de cobertura · [ ] Ligação parafusada e soldada · [ ] Pórtico de galpão |
-| C | Pontes | [ ] Ponte em vigas protendidas · [ ] Ponte em arco · [ ] Ponte estaiada |
+| C | Pontes e pré-moldados | [ ] Ponte em vigas protendidas (no rio) · [ ] Passarela em arco (no rio) · [ ] Ponte estaiada da avenida — as três já existem fisicamente no rio; falta a sequência em corte |
 | D | Edifícios altos | [ ] Vento e deslocamento lateral · [ ] Núcleo rígido e contraventamento |
 | E | Laboratório de materiais | [x] Compressão do corpo de prova · [x] Tração da barra de aço · [ ] Abatimento (slump) |
 | F | Patologias e reforço | [ ] Corrosão de armadura · [ ] Reforço com fibra de carbono |
@@ -177,6 +194,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 ### Perguntas abertas
 
+- **D11 · Próxima obra em corte** — ⭐ Ponte estaiada da avenida (C3: balanço sucessivo das aduelas, estais tensionados um a um) · Ponte em vigas (C1: içamento das vigas pré-moldadas do pátio C até o rio) · Abatimento E3. Ajustar: ___
 - **D10 · Logística sincronizada** — ⭐ a betoneira chega à viga exatamente quando a obra entra na concretagem (mais didático) · deixar independente, como agora (mais simples). Ajustar: ___
 - **D09 · Próxima obra** — ⭐ Abatimento (slump test, E3, fecha o laboratório) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
 - **D08 · Tom do texto** — ⭐ leigo informado (como hoje) · estudante de engenharia com fórmulas · dois níveis com botão. Ajustar: ___
@@ -222,6 +240,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.4 | 06/11/2026 | Rio cortando a cidade, avenida central 2 × 2 faixas, marginais, 3 pontes reais (estaiada, vigas, arco), zona C pré-moldados, barcos; 20 testes |
 | v0.3 | 06/11/2026 | Cidade viva: trânsito, pedestres, logística entre obras, central H, gruas, placas, seguir veículo, atalhos entre obras; 19 testes |
 | v0.2 | 06/11/2026 | Obras E1 (compressão) e E2 (tração); base comum de obra; câmera por etapa; 14 testes |
 | v0.1 | 06/11/2026 | Projeto criado; cidade com 8 zonas e vinhetas; obra A1 Viga biapoiada; 8 testes |

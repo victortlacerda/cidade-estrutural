@@ -1,30 +1,34 @@
 // Malha viária da cidade (funções puras, sem Three.js): cruzamentos, entradas dos lotes,
 // rotas mais curtas e trajetos com mão de direção (faixa da direita).
-import { LOTE, ZONAS } from '../config.js';
+import { LOTE, ZONAS, MAPA } from '../config.js';
 
-const PX = LOTE.w + LOTE.rua, PZ = LOTE.d + LOTE.rua;
-export const FAIXA = 2.2;   // distância do eixo da rua até o meio da faixa (m)
+export const FAIXA = 2.2;                  // rua comum: do eixo ao meio da faixa da direita (m)
+export const FAIXAS_AV = MAPA.av.faixas;   // avenida: faixa da esquerda e da direita de cada sentido
+const XS = MAPA.X, ZS = MAPA.Z;
 
-// Cruzamentos: 5 colunas × 3 linhas
+// Cruzamentos: 5 ruas verticais × 4 horizontais (n{i}{j})
 export const NOS = {};
-for (let i = 0; i <= 4; i++) for (let j = 0; j <= 2; j++) NOS[`n${i}${j}`] = [(i - 2) * PX, (j - 1) * PZ];
+XS.forEach((x, i) => ZS.forEach((z, j) => { NOS[`n${i}${j}`] = [x, z]; }));
 
-// Ligações entre cruzamentos vizinhos
+// Ligações: horizontais em toda a linha; verticais só dentro de cada margem,
+// e entre as marginais (j = 1 ↔ 2) só onde há ponte.
 export const VIZ = {};
 const liga = (a, b) => { (VIZ[a] ??= []).push(b); (VIZ[b] ??= []).push(a); };
-for (let i = 0; i <= 4; i++) for (let j = 0; j <= 2; j++) {
-  if (i < 4) liga(`n${i}${j}`, `n${i + 1}${j}`);
-  if (j < 2) liga(`n${i}${j}`, `n${i}${j + 1}`);
-}
+XS.forEach((x, i) => ZS.forEach((z, j) => {
+  if (i < XS.length - 1) liga(`n${i}${j}`, `n${i + 1}${j}`);
+  if (j === 0 || j === 2) liga(`n${i}${j}`, `n${i}${j + 1}`);
+  if (j === 1 && MAPA.pontes.includes(x)) liga(`n${i}1`, `n${i}2`);
+}));
 
-// Entrada de cada lote: no meio da rua ao sul do lote; portão na borda do lote
+// Entrada de cada lote: na marginal do rio, em frente ao lote; portão na borda do lote voltada para o rio
 export const ENTRADA = {};
 for (const z of ZONAS) {
-  const i = z.c, j = z.r + 1;                  // rua ao sul: linha j
+  const j = z.r === 0 ? 1 : 2, sinal = z.r === 0 ? 1 : -1;
   ENTRADA[z.id] = {
-    rua: [z.x, z.z + LOTE.d / 2 + LOTE.rua / 2],
-    portao: [z.x, z.z + LOTE.d / 2 - 0.5],
-    vizinhos: [`n${i}${j}`, `n${i + 1}${j}`],
+    rua: [z.x, ZS[j]],
+    portao: [z.x, z.z + sinal * (LOTE.d / 2 - 0.5)],
+    vizinhos: [`n${z.c}${j}`, `n${z.c + 1}${j}`],
+    sinal,
   };
 }
 
@@ -57,9 +61,9 @@ export function rota(deZona, paraZona) {
 
 // Desloca uma sequência de pontos do eixo da rua para a faixa da direita.
 // Direção (dx,dz) → direita = (−dz, dx). Em curvas usa a soma dos dois deslocamentos (esquina certa).
-export function naFaixa(pts, faixa = FAIXA) {
-  const dir = (a, b) => { const l = dist(a, b) || 1; return [(b[0] - a[0]) / l, (b[1] - a[1]) / l]; };
-  const dire = (d) => [-d[1] * faixa, d[0] * faixa];
+export function naFaixa(pts, faixa = FAIXA, pista = 1) {
+  const dir = (a, b) => { const l = dist(a, b) || 1; return [(b[0] - a[0]) / l, (b[1] - a[1]) / l, a[0] === 0 && b[0] === 0 ? FAIXAS_AV[pista] : faixa]; };
+  const dire = (d) => [-d[1] * d[2], d[0] * d[2]];
   const out = [];
   for (let k = 0; k < pts.length; k++) {
     const p = pts[k];

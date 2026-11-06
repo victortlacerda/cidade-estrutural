@@ -6,8 +6,11 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const celular = () => window.innerWidth <= 860;
 
-export const VISTA_GERAL = { alvo: [0, 0, 6], dist: 230, yaw: 0.35, pitch: 0.78 };
-export const vistaZona = (z) => ({ alvo: [z.x, 2, z.z], dist: celular() ? 95 : 68, yaw: 0.45, pitch: 0.62 });
+export const VISTA_GERAL = { alvo: [0, 0, 0], dist: 300, yaw: 0.3, pitch: 0.82 };
+export const VISTA_RIO = { alvo: [30, 2, 0], dist: 120, yaw: 0.75, pitch: 0.42 };
+export const vistaZona = (z) => (z.id === 'C'
+  ? { alvo: [z.x + 6, 2, z.z + 30], dist: celular() ? 130 : 95, yaw: 0.55, pitch: 0.5 }
+  : { alvo: [z.x, 2, z.z], dist: celular() ? 95 : 68, yaw: 0.45, pitch: 0.62 });
 
 // Ajusta a câmera de uma etapa: no computador desloca o alvo para a área livre à esquerda da ficha;
 // no celular afasta e desce o alvo para a cena ficar acima da ficha.
@@ -146,7 +149,7 @@ export function criarUI(motor, cidade, obras, vida) {
   // tour: sobrevoa as zonas e termina dentro da obra pronta
   function iniciarTour() {
     sair();
-    const paradas = [VISTA_GERAL, ...ZONAS.map(vistaZona)];
+    const paradas = [VISTA_GERAL, VISTA_RIO, ...ZONAS.map(vistaZona)];
     let i = 0;
     const passo = () => {
       if (i < paradas.length) { motor.voar({ ...paradas[i], dur: 2.2 }); i++; tour = setTimeout(passo, 3600); }
