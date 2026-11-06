@@ -80,6 +80,9 @@ export function criarCidade(motor) {
   const vinhetas = {};
   for (const zn of ZONAS) {
     const g = new THREE.Group(); g.position.set(zn.x, 0, zn.z); raiz.add(g);
+    if (zn.tipo === 'rio') {   // zona sem lote: só o grupo das vinhetas, que fica no rio
+      const vin = new THREE.Group(); vin.name = 'vin-' + zn.id; g.add(vin); VINHETAS[zn.id]?.(vin); vinhetas[zn.id] = vin; continue;
+    }
     const calc = new THREE.Mesh(new THREE.BoxGeometry(LOTE.w + 1.6, 0.14, LOTE.d + 1.6), calcMat);
     calc.position.y = 0.07; calc.receiveShadow = true; g.add(calc);
     const lote = new THREE.Mesh(new THREE.BoxGeometry(LOTE.w, 0.1, LOTE.d), loteMat);
@@ -205,7 +208,7 @@ const VINHETAS = {
     g.add(at(box(2.4, 0.3, 0.3, aco), 15.2, 2.6, -2));
     g.add(at(box(0.05, 0.6, 0.5, 0x9aa7b1), 14.18, 2.6, -2));
   },
-  C(g) {
+  I(g) {
     // pátio de vigas pré-moldadas protendidas (as vigas da ponte do rio saem daqui)
     const sinal = 1;   // lado do rio (+z)
     for (let k = 0; k < 3; k++) {
@@ -238,6 +241,16 @@ const VINHETAS = {
     carro.add(at(box(0.6, 0.3, 2.4, 0x6f7c86), 0, 3.3, 0));
     g.userData.portico = portico; g.userData.carroPortico = carro;
     void sinal;
+  },
+  C(g) {
+    // balsa com guindaste de inspeção das pontes (origem da zona: x = 33, no eixo do rio)
+    const balsa = new THREE.Group(); balsa.name = 'balsa'; balsa.position.set(14, MAPA.rio.agua, 11); g.add(balsa);
+    balsa.add(at(box(12, 1.0, 5, 0x6f7c86), 0, 0.2, 0));
+    balsa.add(at(box(3, 2, 3, 0xeeeeea), -4, 1.7, 0));
+    balsa.add(at(box(1.2, 1.2, 1.2, 0xe0b021), 2.5, 1.3, 0));
+    const lanca = box(0.5, 0.5, 11, 0xe0b021); lanca.position.set(2.5, 4.6, -4.2); lanca.rotation.x = 0.68; balsa.add(lanca);
+    balsa.add(at(box(0.04, 3.2, 0.04, 0x2b2b2b), 2.5, 6.2, -8.6));
+    g.userData.balsa = balsa;
   },
   D(g) {
     const torre = (x, z, n, cor) => {

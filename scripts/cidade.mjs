@@ -19,7 +19,8 @@ await p.evaluate(() => { const a = window.__app; const z = a.cidade.vinhetas.A.p
 await avanca(8); await p.waitForTimeout(2000);
 await p.screenshot({ path: `/tmp/e/${pref}1.png` });
 const vistas = [
-  { alvo: [36, 0, -6], dist: 95, yaw: 0.55, pitch: 0.5 },     // rio, pontes e zona C
+  { alvo: [33, 2, 0], dist: 105, yaw: 0.7, pitch: 0.42 },     // zona C: pontes no rio
+  { alvo: [36, 2, -62], dist: 68, yaw: 0.45, pitch: 0.62 },   // zona I: pré-moldados
   { alvo: [12, 6, 0], dist: 62, yaw: 1.05, pitch: 0.22 },     // estaiada e ponte em vigas, rente à água
   { alvo: [36, 3, 0], dist: 34, yaw: -0.9, pitch: 0.25 },     // passarela em arco
 ];

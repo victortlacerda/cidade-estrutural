@@ -47,10 +47,12 @@ export const ZONAS = [
     { id: 'ligacao', nome: 'Ligação parafusada e soldada' },
     { id: 'portico', nome: 'Pórtico de galpão' },
   ] },
-  { id: 'C', nome: 'Pontes e pré-moldados', c: 2, r: 0, obras: [
-    { id: 'ponte-viga', nome: 'Ponte em vigas protendidas (no rio)' },
-    { id: 'arco', nome: 'Passarela em arco (no rio)' },
+  // C não é um lote: é o trecho do rio com as três pontes
+  { id: 'C', nome: 'Pontes', tipo: 'rio', x: 33, z: 0,
+    entrada: { rua: [66, 0], portao: [63.8, 0], vaga: [63.8, 3], vizinhos: ['n31', 'n32'] }, obras: [
     { id: 'estaiada', nome: 'Ponte estaiada da avenida' },
+    { id: 'ponte-viga', nome: 'Ponte em vigas protendidas' },
+    { id: 'arco', nome: 'Passarela em arco atirantado' },
   ] },
   { id: 'D', nome: 'Edifícios altos', c: 3, r: 0, obras: [
     { id: 'vento', nome: 'Vento e deslocamento lateral' },
@@ -70,6 +72,12 @@ export const ZONAS = [
     { id: 'alvenaria', nome: 'Alvenaria estrutural' },
   ] },
   { id: 'H', nome: 'Central de concreto e aço', c: 3, r: 1, obras: [] },
-].map((z) => ({ ...z, x: cx(z.c), z: cz(z.r) }));
+  { id: 'I', nome: 'Pré-moldados', c: 2, r: 0, obras: [
+    { id: 'protensao', nome: 'Protensão de viga pré-moldada' },
+    { id: 'icamento', nome: 'Içamento e transporte de vigas' },
+  ] },
+].map((z) => (z.tipo === 'rio' ? z : { ...z, x: cx(z.c), z: cz(z.r) }));
+
+export const LOTES = ZONAS.filter((z) => z.tipo !== 'rio');
 
 export const zona = (id) => ZONAS.find((z) => z.id === id);

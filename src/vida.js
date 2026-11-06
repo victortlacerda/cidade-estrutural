@@ -45,6 +45,18 @@ const MODELOS = {
     g.userData.tambor = tambor;
     return g;
   },
+  carretaViga() {
+    const g = new THREE.Group();
+    g.add(at(box(15, 0.4, 2.4, 0x3a3f45), -4, 1.0, 0));
+    cabine(g, 4.2, 0x6b4f8a);
+    const viga = new THREE.Group(); g.add(viga);
+    viga.add(at(box(16, 0.22, 0.8, 0xc9c7c0), -4.5, 1.35, 0));
+    viga.add(at(box(16, 0.9, 0.22, 0xc9c7c0), -4.5, 1.9, 0));
+    viga.add(at(box(16, 0.2, 0.65, 0xc9c7c0), -4.5, 2.45, 0));
+    rodas(g, [-10.5, -9.3, 3.9], 2.3, 0.5);
+    g.userData.carga = viga;
+    return g;
+  },
   carreta() {
     const g = new THREE.Group();
     g.add(at(box(9, 0.4, 2.4, 0x3a3f45), -1, 1.0, 0));
@@ -119,7 +131,8 @@ export function criarVida(motor, cidade) {
   // dz positivo = para o lado do rio (no norte é +z, no sul é −z)
   const ponto = (zid, dx, dz) => { const z = zona(zid); return [z.x + dx, z.z + (z.r === 0 ? dz : -dz)]; };
   const VAGA = {   // onde cada veículo estaciona dentro do lote
-    A: ponto('A', 13, 17), B: ponto('B', 12, 15), C: ponto('C', 14, 21), E: ponto('E', -2, 19), H: ponto('H', 4, 8),
+    A: ponto('A', 13, 17), B: ponto('B', 12, 15), I: ponto('I', 14, 21), E: ponto('E', -2, 19), H: ponto('H', 4, 8),
+    C: zona('C').entrada.vaga,   // em cima da ponte em vigas
   };
   const LOG = [
     { id: 'betoneira', nome: 'Betoneira', modelo: 'betoneira', v: 8, viagens: [
@@ -136,9 +149,13 @@ export function criarVida(motor, cidade) {
       { de: 'E', para: 'B', espera: 12, ida: 'Carreta segue para buscar perfis da treliça (B)', chegada: 'Carreta na obra da treliça (B)', estado: 'rumo à treliça (B)' },
       { de: 'B', para: 'H', espera: 10, ida: 'Carreta volta ao depósito de aço (H)', chegada: 'Carreta carregando aço no depósito (H)', estado: 'voltando ao depósito' },
     ] },
+    { id: 'carretaViga', nome: 'Carreta de vigas', modelo: 'carretaViga', v: 6, viagens: [
+      { de: 'I', para: 'C', espera: 14, carga: true, ida: 'Carreta leva uma viga pré-moldada do pátio (I) para a ponte em vigas (C)', chegada: 'Viga pré-moldada entregue na ponte em vigas (C)', estado: 'viga → Ponte (C)' },
+      { de: 'C', para: 'I', espera: 16, carga: false, ida: 'Carreta volta vazia ao pátio de pré-moldados (I)', chegada: 'Pórtico carregando a próxima viga na carreta (I)', estado: 'voltando ao pátio' },
+    ] },
     { id: 'basculante', nome: 'Caminhão basculante', modelo: 'basculante', v: 8, viagens: [
-      { de: 'H', para: 'C', espera: 12, ida: 'Basculante cruza a ponte estaiada levando brita para o pátio de pré-moldados (C)', chegada: 'Brita descarregada no pátio de pré-moldados (C)', estado: 'brita → Pré-moldados (C)' },
-      { de: 'C', para: 'H', espera: 10, ida: 'Basculante volta à central (H)', chegada: 'Basculante carregando agregados (H)', estado: 'voltando à central' },
+      { de: 'H', para: 'I', espera: 12, ida: 'Basculante cruza a ponte estaiada levando brita para os pré-moldados (I)', chegada: 'Brita descarregada no pátio de pré-moldados (I)', estado: 'brita → Pré-moldados (I)' },
+      { de: 'I', para: 'H', espera: 10, ida: 'Basculante volta à central (H)', chegada: 'Basculante carregando agregados (H)', estado: 'voltando à central' },
     ] },
   ];
   function rotaViagem(v) {
@@ -161,6 +178,7 @@ export function criarVida(motor, cidade) {
         L.espera -= dt;
         if (L.g.userData.tambor) L.g.userData.tambor.rotation.x += dt * 1.5;
         if (L.espera <= 0) {
+          if (v.carga !== undefined && L.g.userData.carga?.isObject3D) L.g.userData.carga.visible = v.carga;
           L.fase = 'indo'; L.trecho = rotaViagem(v); L.s = 0; L.estado = v.estado;
           avisar(v.ida, L);
         }
@@ -187,6 +205,7 @@ export function criarVida(motor, cidade) {
   const pedestres = [];
   const CAMISAS = [0xd24b3e, 0x3b6fb6, 0x5c8f63, 0xe0a33a, 0x6b4f8a, 0xeeeeea, 0x2f7d6b];
   ZONAS.forEach((z, zi) => {
+    if (z.tipo === 'rio') return;
     for (let k = 0; k < 3; k++) {
       const p = pessoa(CAMISAS[(zi + k) % CAMISAS.length], k % 2 ? MAT.pele : MAT.pele2);
       p.upper.children[2].visible = false;   // sem capacete na rua
@@ -231,8 +250,12 @@ export function criarVida(motor, cidade) {
     G.carga.position.set(raio - 4, -desce, 0); G.cabo.position.set(raio - 4, -desce / 2 + 0.3, 0); G.cabo.scale.y = desce - 0.4;
   }));
   // pátio de pré-moldados (zona C): pórtico rolante corre nos trilhos e o carro iça a viga
-  const port = V.C.userData.portico, carroP = V.C.userData.carroPortico;
-  animados.push((t) => { port.position.x = Math.sin(t * 0.09) * 14; carroP.position.z = -7 + Math.sin(t * 0.21) * 8; });
+  const port = V.I.userData.portico, carroP = V.I.userData.carroPortico;
+  const balsa = V.C.userData.balsa;
+  animados.push((t) => {
+    port.position.x = Math.sin(t * 0.09) * 14; carroP.position.z = -7 + Math.sin(t * 0.21) * 8;
+    balsa.position.y = MAPA.rio.agua + Math.sin(t * 1.1) * 0.06; balsa.rotation.z = Math.sin(t * 0.8) * 0.01;
+  });
   // barcos no rio, passando por baixo das pontes
   [[-1, 5, 3.2, 0xd24b3e], [1, -5, 2.6, 0x2f7d6b], [1, 5, 2.2, 0xe0a33a]].forEach(([sent, z, v, cor], i) => {
     const b = new THREE.Group();
@@ -278,7 +301,7 @@ export function criarVida(motor, cidade) {
     e.zona = z; return e;
   });
   const ATIV = {
-    A: 'viga, pilar, laje e sapata em execução', B: 'montagem da treliça e do pórtico', C: 'vigas pré-moldadas · 3 pontes no rio',
+    A: 'viga, pilar, laje e sapata em execução', B: 'montagem da treliça e do pórtico', C: 'estaiada, vigas e arco · balsa de inspeção', I: 'vigas sendo protendidas · pórtico rolante',
     D: 'grua içando · elevadores rodando', E: 'ensaios do dia', F: 'escoramento e reparo', G: 'telhado e alvenaria', H: 'abastecendo as obras',
   };
   const botoesObra = [];

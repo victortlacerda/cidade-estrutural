@@ -1,12 +1,22 @@
 # Cidade Estrutural — Roadmap
 
-**Versão v0.4 · 06/11/2026**
+**Versão v0.5 · 06/11/2026**
 
 Um mundo 3D navegável no navegador em que cada lote é uma zona temática de engenharia estrutural, e cada obra tem uma sequência animada em vista em corte: do canteiro (fôrma, armadura, concretagem) até o comportamento estrutural (esforços, tensões, fissuras, flecha), com números calculados em código e o texto escrito a partir deles.
 
 Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte com painéis planares), do Showroom 3D (regras puras testadas antes da cena) e da Arena (roadmap vivo, decisões numeradas, arquivo único que abre por duplo clique).
 
-## O que mudou nesta rodada (v0.4) — rio, avenida e pontes
+## O que mudou nesta rodada (v0.5) — Pontes e Pré-moldados separados
+
+Pedido do usuário: "pontes e pré-moldados são áreas diferentes, não podem ficar tudo no C".
+
+- **C · Pontes** agora é o trecho do rio com as três pontes (estaiada, vigas e arco). Não tem lote, e a placa fica sobre o rio. Ganhou uma balsa com guindaste de inspeção.
+- **I · Pré-moldados** é uma zona nova, no lote ao norte do rio que antes era do C: pistas de protensão, vigas I, estoque e pórtico rolante.
+- **Ligação I → C:** a carreta de vigas leva uma viga pré-moldada do pátio até a ponte em vigas e para sobre ela. Na volta vem vazia, e o pórtico carrega a próxima.
+- O basculante agora entrega brita no pátio de pré-moldados (I).
+- Malha viária aceita "entrada especial" de zona sem lote (a parada da carreta sobre a ponte).
+
+## Rodada anterior (v0.4) — rio, avenida e pontes
 
 Pedido do usuário: avenida central principal com mais faixas, rio dividindo a cidade em duas partes, ponte unindo os lados e uma zona C Pontes melhor e mais ilustrativa.
 
@@ -74,12 +84,13 @@ Pedido do usuário: "está meio sem vida, não parece uma cidade dinâmica com i
 |---|---|---|
 | A | Concreto armado | [x] Viga biapoiada · [ ] Pilar e flambagem · [ ] Laje maciça e nervurada · [ ] Sapata isolada |
 | B | Estruturas de aço | [ ] Treliça de cobertura · [ ] Ligação parafusada e soldada · [ ] Pórtico de galpão |
-| C | Pontes e pré-moldados | [ ] Ponte em vigas protendidas (no rio) · [ ] Passarela em arco (no rio) · [ ] Ponte estaiada da avenida — as três já existem fisicamente no rio; falta a sequência em corte |
+| C | Pontes (no rio, sem lote) | [ ] Ponte estaiada da avenida · [ ] Ponte em vigas protendidas · [ ] Passarela em arco atirantado — as três já existem no rio; falta a sequência em corte |
 | D | Edifícios altos | [ ] Vento e deslocamento lateral · [ ] Núcleo rígido e contraventamento |
 | E | Laboratório de materiais | [x] Compressão do corpo de prova · [x] Tração da barra de aço · [ ] Abatimento (slump) |
 | F | Patologias e reforço | [ ] Corrosão de armadura · [ ] Reforço com fibra de carbono |
 | G | Madeira e alvenaria | [ ] Tesoura de telhado · [ ] Alvenaria estrutural |
 | H | Central de concreto e aço | Abastece as obras (betoneira, carreta, basculante) |
+| I | Pré-moldados | [ ] Protensão de viga pré-moldada · [ ] Içamento e transporte de vigas |
 
 ## 3. Obras prontas
 
@@ -194,7 +205,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 ### Perguntas abertas
 
-- **D11 · Próxima obra em corte** — ⭐ Ponte estaiada da avenida (C3: balanço sucessivo das aduelas, estais tensionados um a um) · Ponte em vigas (C1: içamento das vigas pré-moldadas do pátio C até o rio) · Abatimento E3. Ajustar: ___
+- **D11 · Próxima obra em corte** — ⭐ Ponte estaiada da avenida (C3: balanço sucessivo das aduelas, estais tensionados um a um) · Protensão no pátio (I1) seguida do içamento da viga na ponte (C2) · Abatimento E3. Ajustar: ___
 - **D10 · Logística sincronizada** — ⭐ a betoneira chega à viga exatamente quando a obra entra na concretagem (mais didático) · deixar independente, como agora (mais simples). Ajustar: ___
 - **D09 · Próxima obra** — ⭐ Abatimento (slump test, E3, fecha o laboratório) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
 - **D08 · Tom do texto** — ⭐ leigo informado (como hoje) · estudante de engenharia com fórmulas · dois níveis com botão. Ajustar: ___
@@ -240,6 +251,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.5 | 06/11/2026 | Zona C = Pontes (rio, balsa de inspeção); nova zona I = Pré-moldados; carreta de vigas I → ponte em vigas |
 | v0.4 | 06/11/2026 | Rio cortando a cidade, avenida central 2 × 2 faixas, marginais, 3 pontes reais (estaiada, vigas, arco), zona C pré-moldados, barcos; 20 testes |
 | v0.3 | 06/11/2026 | Cidade viva: trânsito, pedestres, logística entre obras, central H, gruas, placas, seguir veículo, atalhos entre obras; 19 testes |
 | v0.2 | 06/11/2026 | Obras E1 (compressão) e E2 (tração); base comum de obra; câmera por etapa; 14 testes |

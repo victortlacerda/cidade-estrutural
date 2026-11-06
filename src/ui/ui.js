@@ -8,8 +8,8 @@ const celular = () => window.innerWidth <= 860;
 
 export const VISTA_GERAL = { alvo: [0, 0, 0], dist: 300, yaw: 0.3, pitch: 0.82 };
 export const VISTA_RIO = { alvo: [30, 2, 0], dist: 120, yaw: 0.75, pitch: 0.42 };
-export const vistaZona = (z) => (z.id === 'C'
-  ? { alvo: [z.x + 6, 2, z.z + 30], dist: celular() ? 130 : 95, yaw: 0.55, pitch: 0.5 }
+export const vistaZona = (z) => (z.tipo === 'rio'
+  ? { alvo: [z.x, 2, z.z], dist: celular() ? 150 : 105, yaw: 0.7, pitch: 0.42 }
   : { alvo: [z.x, 2, z.z], dist: celular() ? 95 : 68, yaw: 0.45, pitch: 0.62 });
 
 // Ajusta a câmera de uma etapa: no computador desloca o alvo para a área livre à esquerda da ficha;
@@ -30,7 +30,7 @@ export function criarUI(motor, cidade, obras, vida) {
       <button class="zona-cab" type="button" data-zona="${z.id}"><span class="letra">${z.id}</span><span class="nome">${esc(z.nome)}</span></button>
       <ul class="obras">${z.obras.map((o) => o.pronta
         ? `<li><button type="button" data-obra="${o.id}">${esc(o.nome)} <span class="pronta">abrir</span></button></li>`
-        : `<li><span>${esc(o.nome)}</span><span class="breve">em breve</span></li>`).join('') || '<li><span>Entrada da cidade</span></li>'}</ul>
+        : `<li><span>${esc(o.nome)}</span><span class="breve">em breve</span></li>`).join('') || '<li><span>Abastece as obras da cidade</span></li>'}</ul>
     </div>`).join('');
   $('listaZonas').addEventListener('click', (e) => {
     const zb = e.target.closest('[data-zona]'), ob = e.target.closest('[data-obra]');

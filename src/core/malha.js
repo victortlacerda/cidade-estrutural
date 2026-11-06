@@ -23,6 +23,7 @@ XS.forEach((x, i) => ZS.forEach((z, j) => {
 // Entrada de cada lote: na marginal do rio, em frente ao lote; portão na borda do lote voltada para o rio
 export const ENTRADA = {};
 for (const z of ZONAS) {
+  if (z.entrada) { ENTRADA[z.id] = { ...z.entrada, sinal: 1 }; continue; }
   const j = z.r === 0 ? 1 : 2, sinal = z.r === 0 ? 1 : -1;
   ENTRADA[z.id] = {
     rua: [z.x, ZS[j]],
