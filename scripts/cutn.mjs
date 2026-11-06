@@ -20,7 +20,7 @@ for (const t of ts.split(',')) {
   await p.evaluate(([t, obra]) => {
     const a = window.__app;
     if (obra !== 'cidade') { const o = a.obras[obra]; o.state.paused = true; o.state.tc = +t; o.state.hold = 0; o.render(+t);
-      const c = window.innerWidth <= 860 ? o.mcam : o.cam; a.motor.pular(c); }
+      o.render(+t); a.motor.pular(a.ui.camPara(o, o.state.step)); }
   }, [t, obra]);
   await p.waitForTimeout(1500);
   await p.screenshot({ path: `/tmp/e/${pref}${i}.png` });

@@ -1,12 +1,20 @@
 # Cidade Estrutural — Roadmap
 
-**Versão v0.1 · 06/11/2026**
+**Versão v0.2 · 06/11/2026**
 
 Um mundo 3D navegável no navegador em que cada lote é uma zona temática de engenharia estrutural, e cada obra tem uma sequência animada em vista em corte: do canteiro (fôrma, armadura, concretagem) até o comportamento estrutural (esforços, tensões, fissuras, flecha), com números calculados em código e o texto escrito a partir deles.
 
 Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte com painéis planares), do Showroom 3D (regras puras testadas antes da cena) e da Arena (roadmap vivo, decisões numeradas, arquivo único que abre por duplo clique).
 
-## O que mudou nesta rodada (v0.1)
+## O que mudou nesta rodada (v0.2)
+
+- **Obra E1 — Compressão do corpo de prova** pronta (6 etapas, 1:50 min).
+- **Obra E2 — Tração da barra de aço CA-50** pronta (7 etapas, 1:40 min), com a barra deformando de verdade: nervuras, base de medida, estricção e ruptura.
+- Base comum de obra (`src/core/obra.js`): relógio, ciclo, rótulos e **câmera por etapa** (a câmera acompanha cada etapa até o usuário girar a cena).
+- Cálculos dos ensaios em `src/calc/ensaios.js`, com 6 testes novos (14 no total).
+- Corrigido: a câmera não deixava chegar a menos de 4 m (closes não funcionavam).
+
+## Rodada anterior (v0.1)
 
 - Projeto criado do zero: Three.js 0.170 + Vite 5, build em arquivo único.
 - Cidade com 8 lotes (zonas A a H), ruas, placas e vinhetas de todas as obras planejadas.
@@ -30,7 +38,7 @@ Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte c
 | B | Estruturas de aço | [ ] Treliça de cobertura · [ ] Ligação parafusada e soldada · [ ] Pórtico de galpão |
 | C | Pontes | [ ] Ponte em vigas protendidas · [ ] Ponte em arco · [ ] Ponte estaiada |
 | D | Edifícios altos | [ ] Vento e deslocamento lateral · [ ] Núcleo rígido e contraventamento |
-| E | Laboratório de materiais | [ ] Compressão do corpo de prova · [ ] Tração da barra de aço · [ ] Abatimento (slump) |
+| E | Laboratório de materiais | [x] Compressão do corpo de prova · [x] Tração da barra de aço · [ ] Abatimento (slump) |
 | F | Patologias e reforço | [ ] Corrosão de armadura · [ ] Reforço com fibra de carbono |
 | G | Madeira e alvenaria | [ ] Tesoura de telhado · [ ] Alvenaria estrutural |
 | H | Praça da Estrutura | Entrada da cidade (pórtico, bancos) |
@@ -70,6 +78,43 @@ Corte longitudinal no eixo da viga: a metade da frente do concreto foi retirada,
 - [ ] Espaçamento das fissuras segue os estribos de forma simplificada.
 - [ ] Representação dos apoios (fixo/móvel) sobre pilar: suficiente ou desenhar o símbolo de apoio?
 
+### E1 · Compressão do corpo de prova de concreto (v0.2)
+
+| # | Etapa | Início | O que se vê |
+|---|---|---|---|
+| 1 | Moldagem | 0 s | molde 10 × 20 cm em corte, 2 camadas × 12 golpes, rasar o topo |
+| 2 | Cura | 16 s | desmoldagem após 24 h, tanque de água, contador até 28 dias |
+| 3 | Retificação | 28 s | disco retifica a face |
+| 4 | Ensaio na prensa | 38 s | prato com rótula, força a 0,45 MPa/s, mostrador, curva σ × ε, fissuras verticais, ruptura em cone e cacos |
+| 5 | Resultado do lote | 82 s | 6 exemplares em barras, fcm, s, fck,est |
+| 6 | Leitura da curva | 96 s | pico ≈ 2‰, trecho pós-pico pontilhado, módulo secante |
+
+**Valores adotados (exemplo):** exemplares 29,8 · 31,2 · 28,6 · **30,4** (o ensaiado) · 27,9 · 30,9 MPa; fcm = 29,8 MPa; s = 1,31 MPa; fck,est = fcm − 1,65·s = 27,6 MPa ≥ 25 → aceito. Força de ruptura 238,8 kN em 78,54 cm². Curva parabólica com pico em 2,1‰. Módulo secante (0,5 MPa a 30% fc) ≈ 26,5 GPa. A animação do carregamento é ~2,1× mais rápida que o ensaio real.
+
+**Pendente:**
+- [ ] A NBR 12655 usa outra fórmula para amostragem parcial com 6 exemplares (fck,est = 2·(f1+…+fm−1)/(m−1) − fm, com ψ6). Usei fcm − 1,65·s por ser mais didático. Trocar?
+- [ ] Curva pós-pico é só referência (a prensa comum, com controle de força, não registra esse trecho). O texto diz isso; conferir redação.
+- [ ] Moldagem: 2 camadas × 12 golpes para 10 × 20 cm (NBR 5738). Confirmar.
+
+### E2 · Tração da barra de aço CA-50 φ16 (v0.2)
+
+| # | Etapa | Início | O que se vê |
+|---|---|---|---|
+| 1 | Barra e marcação | 0 s | barra de 50 cm na bancada, marcas da base de medida 10φ = 160 mm |
+| 2 | Fixação nas garras | 12 s | barra vai para a máquina universal, garras fecham, extensômetro |
+| 3 | Regime elástico | 22 s | reta σ = E·ε (detalhe ampliado até 0,6%) |
+| 4 | Escoamento | 36 s | patamar em fy, extensômetro sai |
+| 5 | Encruamento e estricção | 48 s | close no pescoço, a barra afina, força nominal cai |
+| 6 | Ruptura | 72 s | as duas partes se separam |
+| 7 | Leitura do resultado | 80 s | partes encostadas, Lu entre as marcas, quadro NBR 7480 |
+
+**Valores adotados (exemplo):** área 201,1 mm²; E = 210 GPa; fy = 560 MPa (Fy = 112,6 kN); fu = 680 MPa (Fu = 136,7 kN); fu/fy = 1,21; fim do patamar 1,5%; carga máxima em 11%; ruptura com 16% (Lu = 185,6 mm). Atende CA-50: fy ≥ 500, fu/fy ≥ 1,08, alongamento ≥ 8%.
+
+**Pendente:**
+- [ ] Alongamento medido em 10φ: confirmar se prefere 5φ ou outra base.
+- [ ] O alongamento animado distribui a parte uniforme no trecho livre entre garras (simplificação).
+- [ ] Incluir o ensaio de dobramento (a NBR 7480 também exige)? Pode virar a etapa extra ou uma obra E4.
+
 ## 4. Arquitetura
 
 ```
@@ -79,10 +124,14 @@ src/
   core/engine.js   renderizador, luzes, câmera com voo, tema, rótulos 3D
   core/kit.js      materiais, caixas, pessoas articuladas, painéis de canvas, tempo
   world.js         ruas, lotes, placas, vinhetas
+  core/obra.js     base de obra: relógio, ciclo, rótulos, câmera por etapa
+  calc/ensaios.js  cálculos PUROS dos ensaios E1 e E2
   zones/viga.js    obra A1 (contrato abaixo)
+  zones/lab.js     sala de laboratório em corte (compartilhada)
+  zones/compressao.js, zones/tracao.js   obras E1 e E2
   ui/ui.js         índice, ficha da obra, linha do tempo, tour
   main.js          monta tudo e roda o laço
-tests/viga.test.js
+tests/viga.test.js, tests/ensaios.test.js
 scripts/artifact.mjs   gera dist/cidade-estrutural.html e dist/artifact.html
 scripts/cutn.mjs       fotos headless por instante da obra
 ```
@@ -100,11 +149,12 @@ scripts/cutn.mjs       fotos headless por instante da obra
 | D03 | Primeira obra | ⭐ viga biapoiada (canteiro + comportamento) | define o padrão das próximas |
 | D04 | Exagero visual | ⭐ deformada 40×, barras 1,5×, sempre avisado na tela | legibilidade |
 | D05 | Norma de referência | ⭐ NBR 6118 simplificada | textos e números |
+| D07 | Próxima obra (v0.1) | ⭐ E1 compressão, e também E2 tração ("continue") | fecham C25 e CA-50 da viga |
 | D06 | Repositório | ⏳ `cidade-estrutural` ainda não existe no GitHub da sessão; entregue como bundle | ver próximos passos |
 
 ### Perguntas abertas
 
-- **D07 · Próxima obra** — ⭐ Laboratório E1 (compressão do corpo de prova, completa a história do C25) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
+- **D09 · Próxima obra** — ⭐ Abatimento (slump test, E3, fecha o laboratório) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
 - **D08 · Tom do texto** — ⭐ leigo informado (como hoje) · estudante de engenharia com fórmulas · dois níveis com botão. Ajustar: ___
 
 ## 6. Banco de ideias
@@ -133,12 +183,13 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 ## 9. Próximos passos
 
-1. Usuário revisa a obra A1 e responde as pendências.
-2. Decidir D07 e fazer a próxima obra.
+1. Usuário revisa as obras A1, E1 e E2 e responde as pendências.
+2. Decidir D09 e fazer a próxima obra.
 3. Criar o repositório `cidade-estrutural` vazio e enviar o bundle (instruções no README).
 
 ## 10. Changelog
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.2 | 06/11/2026 | Obras E1 (compressão) e E2 (tração); base comum de obra; câmera por etapa; 14 testes |
 | v0.1 | 06/11/2026 | Projeto criado; cidade com 8 zonas e vinhetas; obra A1 Viga biapoiada; 8 testes |

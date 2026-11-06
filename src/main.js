@@ -2,13 +2,20 @@
 import { criarMotor } from './core/engine.js';
 import { criarCidade } from './world.js';
 import { criarViga } from './zones/viga.js';
+import { criarCompressao } from './zones/compressao.js';
+import { criarTracao } from './zones/tracao.js';
 import { criarUI, VISTA_GERAL } from './ui/ui.js';
 import { zona } from './config.js';
 
 const motor = criarMotor(document.getElementById('cena'));
 const cidade = criarCidade(motor);
 const A = zona('A');
-const obras = { viga: criarViga(motor, [A.x, 0.2, A.z + 4]) };
+const E = zona('E');
+const obras = {
+  viga: criarViga(motor, [A.x, 0.2, A.z + 4]),
+  compressao: criarCompressao(motor, [E.x - 9, 0.2, E.z + 10]),
+  tracao: criarTracao(motor, [E.x + 8, 0.2, E.z + 10]),
+};
 const ui = criarUI(motor, cidade, obras);
 
 let temaInicial = 'claro';

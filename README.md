@@ -2,12 +2,16 @@
 
 Cidade 3D no navegador em que cada lote é uma zona de engenharia estrutural e cada obra tem uma sequência animada em vista em corte, com os números calculados em código.
 
-Primeira obra pronta: **viga biapoiada de concreto armado** (fôrma, armadura, concretagem, cura, carregamento, fissuração e flecha).
+Obras prontas:
+
+- **A1 · Viga biapoiada de concreto armado** (`#viga`): fôrma, armadura, concretagem, cura, carregamento, fissuração e flecha.
+- **E1 · Compressão do corpo de prova** (`#compressao`): moldagem, cura, retificação, prensa, resultado do lote.
+- **E2 · Tração da barra de aço CA-50** (`#tracao`): elástico, escoamento, estricção, ruptura e leitura.
 
 ## Como abrir
 
 Dê duplo clique em `cidade-estrutural.html`. Não precisa de servidor nem internet (sem internet ele usa as fontes do computador).
-Para abrir direto na obra: `cidade-estrutural.html#viga`.
+Para abrir direto numa obra: `cidade-estrutural.html#viga` (ou `#compressao`, `#tracao`).
 
 Atalhos: espaço pausa, Esc sai da obra. Arraste para girar, role para aproximar.
 

@@ -9,8 +9,17 @@ const celular = () => window.innerWidth <= 860;
 export const VISTA_GERAL = { alvo: [0, 0, 6], dist: 230, yaw: 0.35, pitch: 0.78 };
 export const vistaZona = (z) => ({ alvo: [z.x, 2, z.z], dist: celular() ? 95 : 68, yaw: 0.45, pitch: 0.62 });
 
+// Ajusta a câmera de uma etapa: no computador desloca o alvo para a área livre à esquerda da ficha;
+// no celular afasta e desce o alvo para a cena ficar acima da ficha.
+function ajustarCam(c) {
+  const [x, y, z] = c.alvo;
+  if (celular()) return { ...c, alvo: [x, y - 0.42 * c.dist, z], dist: c.dist * 1.9 };
+  return { ...c, alvo: [x + 0.17 * c.dist, y, z] };
+}
+
 export function criarUI(motor, cidade, obras) {
-  let atual = null, tour = null, arrastando = false;
+  let atual = null, tour = null, arrastando = false, camManual = false;
+  motor.controls.addEventListener('start', () => { camManual = true; });
 
   // índice
   $('listaZonas').innerHTML = ZONAS.map((z) => `
@@ -46,7 +55,8 @@ export function criarUI(motor, cidade, obras) {
     atual = o;
     if (cidade.vinhetas[o.hide]) cidade.vinhetas[o.hide].visible = false;
     o.enter();
-    motor.voar({ ...(celular() ? o.mcam : o.cam), dur: 2.0 });
+    camManual = false;
+    motor.voar({ ...(o.camEtapa ? ajustarCam(o.camEtapa(0)) : (celular() ? o.mcam : o.cam)), dur: 2.0 });
     $('obra').hidden = false; $('nota').hidden = false; $('ajuda').hidden = true;
     document.body.classList.add('em-obra'); fecharIndice();
     $('obraSub').textContent = o.sub; $('obraTit').textContent = o.tit;
@@ -90,6 +100,7 @@ export function criarUI(motor, cidade, obras) {
         b.toggleAttribute('aria-current', i === s.step); if (i === s.step) b.setAttribute('aria-current', 'step');
         b.classList.toggle('feita', i < s.step);
       });
+      if (atual.camEtapa && !camManual) motor.voar({ ...ajustarCam(atual.camEtapa(s.step)), dur: 1.6 });
       const st = atual.steps[s.step];
       $('texto').innerHTML = `<h3>${s.step + 1}. ${esc(st.t)}</h3><p>${esc(st.d)}</p>
         <p class="exemplo">Números de exemplo didático, não são de projeto.</p>`;
@@ -121,5 +132,6 @@ export function criarUI(motor, cidade, obras) {
     if (e.key === ' ' && atual) { e.preventDefault(); $('btnPlay').click(); }
   });
 
-  return { abrir, sair, atualizar, get atual() { return atual; }, LOTE };
+  const camPara = (o, i) => (o.camEtapa ? ajustarCam(o.camEtapa(i)) : (celular() ? o.mcam : o.cam));
+  return { abrir, sair, atualizar, camPara, get atual() { return atual; }, LOTE };
 }

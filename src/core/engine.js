@@ -30,7 +30,7 @@ export function criarMotor(container) {
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = 0.08;
-  controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 4; controls.maxDistance = 360;
+  controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 0.5; controls.maxDistance = 360;
 
   // Voo de câmera: alvo + distância + yaw + pitch
   let voo = null;

@@ -47,8 +47,8 @@ export const ZONAS = [
     { id: 'nucleo', nome: 'Núcleo rígido e contraventamento' },
   ] },
   { id: 'E', nome: 'Laboratório de materiais', c: 0, r: 1, obras: [
-    { id: 'compressao', nome: 'Compressão do corpo de prova' },
-    { id: 'tracao', nome: 'Tração da barra de aço' },
+    { id: 'compressao', nome: 'Compressão do corpo de prova', pronta: true },
+    { id: 'tracao', nome: 'Tração da barra de aço', pronta: true },
     { id: 'slump', nome: 'Abatimento (slump test)' },
   ] },
   { id: 'F', nome: 'Patologias e reforço', c: 1, r: 1, obras: [
