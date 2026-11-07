@@ -1,12 +1,41 @@
 # Cidade Estrutural — Roadmap
 
-**Versão v0.5 · 06/11/2026**
+**Versão v0.6 · 07/11/2026**
 
 Um mundo 3D navegável no navegador em que cada lote é uma zona temática de engenharia estrutural, e cada obra tem uma sequência animada em vista em corte: do canteiro (fôrma, armadura, concretagem) até o comportamento estrutural (esforços, tensões, fissuras, flecha), com números calculados em código e o texto escrito a partir deles.
 
 Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte com painéis planares), do Showroom 3D (regras puras testadas antes da cena) e da Arena (roadmap vivo, decisões numeradas, arquivo único que abre por duplo clique).
 
-## O que mudou nesta rodada (v0.5) — Pontes e Pré-moldados separados
+## O que mudou nesta rodada (v0.6) — viga protendida do pátio à ponte
+
+- **Obra I1 · Viga pré-moldada protendida** (1:58 min, `#protensao`). Sete etapas: pista, cordoalhas e macaco, armadura passiva e isolamento, concretagem e cura térmica, liberação, leitura, saque. Na liberação, a face cortada vira um **mapa de tensões** (azul comprimido, vermelho tracionado) e a viga ganha contraflecha.
+- **Obra C2 · Ponte em vigas: içamento e laje** (1:48 min, `#icamento`). Sete etapas: apoios de neoprene, chegada da carreta, içamento das 4 vigas pelo guindaste, transversinas, laje, pavimento e tráfego, leitura. A contraflecha cai de 13,1 para 1,4 mm conforme a laje é concretada.
+- A ponte pronta da cidade some enquanto a C2 está aberta, e o trânsito nela é bloqueado.
+- Atalhos: I1 ↔ C2 e I1 → E1 (resistência do concreto). Botões "▶" na cena para as duas obras.
+- Cálculos em `src/calc/protendida.js` com 6 testes novos (26 no total).
+- A câmera agora desloca a cena para o lado livre conforme a direção em que olha. No celular, nunca desce abaixo do objeto.
+
+### I1 · Valores adotados (exemplo, não é de projeto)
+- Seção I h = 100 cm (mesa sup. 60 × 15, alma 15 × 70, mesa inf. 50 × 15): A = 0,270 m², yb = 52,4 cm, I = 0,03425 m⁴; e = 45,4 cm.
+- 10 cordoalhas CP-190 RB φ12,7; macaco a 1450 MPa (limite 1453,5) → 143,1 kN e Δl = 159,5 mm em 22 m; cravação de 5 mm → −45 MPa → σpi = 1404,5 MPa.
+- Liberação com fckj = 28 MPa: encurtamento elástico −71,6 MPa (5,1%) → P = 1316 kN.
+- Meio do vão: topo −0,42 MPa (limite de tração 3,32) e base 10,7 MPa (limite 19,6).
+- Ponta: topo −3,43 MPa sem isolamento (passaria do limite) e −2,74 MPa com 2 cordoalhas isoladas em 1,5 m.
+- Contraflecha na liberação: 18,8 − 5,7 = 13,1 mm.
+
+### C2 · Valores adotados (exemplo)
+- Vãos 9,2 + 16 + 9,2 m; 4 longarinas a cada 3 m; laje de 20 cm → 15 kN/m por viga → flecha de 11,7 mm → contraflecha final de 1,4 mm.
+- Perdas diferidas adotadas em 15% → P∞ = 1118 kN; meio do vão: topo 6,8 MPa (limite 24) e base 1,26 MPa (ainda comprimida).
+- Içamento: viga de 11,0 t + 1,5 t de acessórios. Raio máximo 30,4 m; tabela do guindaste de exemplo (640/raio) → 21,0 t → 59%.
+
+### Pendente (para o especialista confirmar)
+- [ ] Perdas diferidas de 15% foram adotadas, não calculadas (retração, fluência e relaxação).
+- [ ] A verificação final usa só a seção simples (viga + laje sem tráfego). A seção composta com carga móvel fica para outra obra.
+- [ ] Tabela de carga do guindaste é fictícia (640/raio t).
+- [ ] Comprimento de transferência de 64 cm (≈ 50φ) e isolamento de 1,5 m: conferir com a NBR 6118 / NBR 9062.
+- [ ] Vãos laterais de 9,2 m com a mesma seção, sem verificação própria.
+
+## Rodada anterior (v0.5) — Pontes e Pré-moldados separados
 
 Pedido do usuário: "pontes e pré-moldados são áreas diferentes, não podem ficar tudo no C".
 
@@ -84,13 +113,13 @@ Pedido do usuário: "está meio sem vida, não parece uma cidade dinâmica com i
 |---|---|---|
 | A | Concreto armado | [x] Viga biapoiada · [ ] Pilar e flambagem · [ ] Laje maciça e nervurada · [ ] Sapata isolada |
 | B | Estruturas de aço | [ ] Treliça de cobertura · [ ] Ligação parafusada e soldada · [ ] Pórtico de galpão |
-| C | Pontes (no rio, sem lote) | [ ] Ponte estaiada da avenida · [ ] Ponte em vigas protendidas · [ ] Passarela em arco atirantado — as três já existem no rio; falta a sequência em corte |
+| C | Pontes (no rio, sem lote) | [ ] Ponte estaiada da avenida · [x] Ponte em vigas: içamento e laje (C2) · [ ] Passarela em arco atirantado — as três já existem no rio; falta a sequência em corte |
 | D | Edifícios altos | [ ] Vento e deslocamento lateral · [ ] Núcleo rígido e contraventamento |
 | E | Laboratório de materiais | [x] Compressão do corpo de prova · [x] Tração da barra de aço · [ ] Abatimento (slump) |
 | F | Patologias e reforço | [ ] Corrosão de armadura · [ ] Reforço com fibra de carbono |
 | G | Madeira e alvenaria | [ ] Tesoura de telhado · [ ] Alvenaria estrutural |
 | H | Central de concreto e aço | Abastece as obras (betoneira, carreta, basculante) |
-| I | Pré-moldados | [ ] Protensão de viga pré-moldada · [ ] Içamento e transporte de vigas |
+| I | Pré-moldados | [x] Protensão de viga pré-moldada (I1) · [ ] Estoque, transporte e controle de qualidade |
 
 ## 3. Obras prontas
 
@@ -205,7 +234,8 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 ### Perguntas abertas
 
-- **D11 · Próxima obra em corte** — ⭐ Ponte estaiada da avenida (C3: balanço sucessivo das aduelas, estais tensionados um a um) · Protensão no pátio (I1) seguida do içamento da viga na ponte (C2) · Abatimento E3. Ajustar: ___
+- **D12 · Próxima obra** — ⭐ Ponte estaiada da avenida (balanço sucessivo das aduelas e estais tensionados um a um) · Passarela em arco · Pilar e flambagem (A2). Ajustar: ___
+- **D11 · Próxima obra em corte** (respondida: I1 + C2) — ⭐ Ponte estaiada da avenida (C3: balanço sucessivo das aduelas, estais tensionados um a um) · Protensão no pátio (I1) seguida do içamento da viga na ponte (C2) · Abatimento E3. Ajustar: ___
 - **D10 · Logística sincronizada** — ⭐ a betoneira chega à viga exatamente quando a obra entra na concretagem (mais didático) · deixar independente, como agora (mais simples). Ajustar: ___
 - **D09 · Próxima obra** — ⭐ Abatimento (slump test, E3, fecha o laboratório) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
 - **D08 · Tom do texto** — ⭐ leigo informado (como hoje) · estudante de engenharia com fórmulas · dois níveis com botão. Ajustar: ___
@@ -251,6 +281,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.6 | 07/11/2026 | Obras I1 protensão e C2 içamento na ponte; mapa de tensões na face; ponte some durante a obra; 26 testes |
 | v0.5 | 06/11/2026 | Zona C = Pontes (rio, balsa de inspeção); nova zona I = Pré-moldados; carreta de vigas I → ponte em vigas |
 | v0.4 | 06/11/2026 | Rio cortando a cidade, avenida central 2 × 2 faixas, marginais, 3 pontes reais (estaiada, vigas, arco), zona C pré-moldados, barcos; 20 testes |
 | v0.3 | 06/11/2026 | Cidade viva: trânsito, pedestres, logística entre obras, central H, gruas, placas, seguir veículo, atalhos entre obras; 19 testes |

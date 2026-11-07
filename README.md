@@ -7,6 +7,8 @@ Obras prontas:
 - **A1 · Viga biapoiada de concreto armado** (`#viga`): fôrma, armadura, concretagem, cura, carregamento, fissuração e flecha.
 - **E1 · Compressão do corpo de prova** (`#compressao`): moldagem, cura, retificação, prensa, resultado do lote.
 - **E2 · Tração da barra de aço CA-50** (`#tracao`): elástico, escoamento, estricção, ruptura e leitura.
+- **I1 · Viga pré-moldada protendida** (`#protensao`): cordoalhas, cura térmica, liberação com mapa de tensões e contraflecha.
+- **C2 · Ponte em vigas: içamento e laje** (`#icamento`): guindaste, transversinas, laje e tráfego.
 
 ## Como abrir
 

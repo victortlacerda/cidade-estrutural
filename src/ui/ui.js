@@ -16,8 +16,10 @@ export const vistaZona = (z) => (z.tipo === 'rio'
 // no celular afasta e desce o alvo para a cena ficar acima da ficha.
 function ajustarCam(c) {
   const [x, y, z] = c.alvo;
-  if (celular()) return { ...c, alvo: [x, y - 0.42 * c.dist, z], dist: c.dist * 1.9 };
-  return { ...c, alvo: [x + 0.17 * c.dist, y, z] };
+  // no celular a cena sobe para a metade de cima; a câmera nunca desce abaixo do objeto
+  if (celular()) { const d = c.dist * 1.9; return { ...c, alvo: [x, y - 0.16 * d, z], dist: d, pitch: Math.max(c.pitch, 0.42) }; }
+  const k = 0.17 * c.dist;   // desloca ao longo da direita da câmera (depende do yaw)
+  return { ...c, alvo: [x + Math.cos(c.yaw) * k, y, z - Math.sin(c.yaw) * k] };
 }
 
 export function criarUI(motor, cidade, obras, vida) {
@@ -60,7 +62,7 @@ export function criarUI(motor, cidade, obras, vida) {
     o.enter();
     if (etapa) { o.state.tc = o.starts[etapa] + 0.01; o.render(o.state.tc); }
     camManual = false;
-    if (vida) vida.emObra = true;
+    if (vida) { vida.emObra = true; vida.bloqueio = o.bloqueio; }
     motor.voar({ ...(o.camEtapa ? ajustarCam(o.camEtapa(etapa)) : (celular() ? o.mcam : o.cam)), dur: 2.0 });
     $('obra').hidden = false; $('nota').hidden = false; $('ajuda').hidden = true;
     document.body.classList.add('em-obra'); fecharIndice();
@@ -76,7 +78,7 @@ export function criarUI(motor, cidade, obras, vida) {
     atual.exit();
     if (cidade.vinhetas[atual.hide]) cidade.vinhetas[atual.hide].visible = true;
     atual = null;
-    if (vida) vida.emObra = false;
+    if (vida) { vida.emObra = false; vida.bloqueio = null; }
     $('obra').hidden = true; $('nota').hidden = true; $('ajuda').hidden = false;
     document.body.classList.remove('em-obra');
     try { history.replaceState(null, '', location.pathname + location.search); } catch { /* sem histórico */ }

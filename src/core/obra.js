@@ -11,7 +11,7 @@ export function criarObra(motor, origem, cfg) {
 
   const obra = {
     id: cfg.id, group: root, state, P,
-    nome: cfg.nome, tit: cfg.tit, sub: cfg.sub, hide: cfg.hide,
+    nome: cfg.nome, tit: cfg.tit, sub: cfg.sub, hide: cfg.hide, bloqueio: cfg.bloqueio ?? null,
     steps: cfg.steps, starts: cfg.starts, fim: cfg.fim,
     // câmeras por etapa em coordenadas locais: [alvo x,y,z, dist, yaw, pitch]
     camEtapa: (i) => {
@@ -35,8 +35,14 @@ export function criarObra(motor, origem, cfg) {
       }
       obra.render(state.tc);
     },
-    enter() { state.active = true; state.tc = 0; state.hold = 0; state.paused = false; root.visible = true; obra.render(0); },
-    exit() { state.active = false; root.visible = false; rotulos.forEach((R) => { R.r.vis = false; }); },
+    enter() {
+      state.active = true; state.tc = 0; state.hold = 0; state.paused = false; root.visible = true;
+      (cfg.esconder || []).forEach((n) => { const o = motor.scene.getObjectByName(n); if (o) o.visible = false; });
+      obra.render(0);
+    },
+    exit() {
+      (cfg.esconder || []).forEach((n) => { const o = motor.scene.getObjectByName(n); if (o) o.visible = true; });
+      state.active = false; root.visible = false; rotulos.forEach((R) => { R.r.vis = false; }); },
   };
   obra.cam = obra.camEtapa(0);
   return obra;

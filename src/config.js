@@ -51,7 +51,7 @@ export const ZONAS = [
   { id: 'C', nome: 'Pontes', tipo: 'rio', x: 33, z: 0,
     entrada: { rua: [66, 0], portao: [63.8, 0], vaga: [63.8, 3], vizinhos: ['n31', 'n32'] }, obras: [
     { id: 'estaiada', nome: 'Ponte estaiada da avenida' },
-    { id: 'ponte-viga', nome: 'Ponte em vigas protendidas' },
+    { id: 'icamento', nome: 'Ponte em vigas: içamento e laje', pronta: true },
     { id: 'arco', nome: 'Passarela em arco atirantado' },
   ] },
   { id: 'D', nome: 'Edifícios altos', c: 3, r: 0, obras: [
@@ -73,8 +73,8 @@ export const ZONAS = [
   ] },
   { id: 'H', nome: 'Central de concreto e aço', c: 3, r: 1, obras: [] },
   { id: 'I', nome: 'Pré-moldados', c: 2, r: 0, obras: [
-    { id: 'protensao', nome: 'Protensão de viga pré-moldada' },
-    { id: 'icamento', nome: 'Içamento e transporte de vigas' },
+    { id: 'protensao', nome: 'Protensão de viga pré-moldada', pronta: true },
+    { id: 'estoque', nome: 'Estoque, transporte e controle de qualidade' },
   ] },
 ].map((z) => (z.tipo === 'rio' ? z : { ...z, x: cx(z.c), z: cz(z.r) }));
 

@@ -76,6 +76,10 @@ export function criarCidade(motor) {
     for (let z = z0 + 6; z < z1 - 3; z += 12) if (!MAPA.Z.some((zz) => Math.abs(zz - z) < 8)) arvore(raiz, 0, z, arvMat, 0.8);
   });
 
+  // pista e faixas sobre a ponte em vigas num grupo próprio (a obra C2 esconde enquanto constrói)
+  const pistaPV = new THREE.Group(); pistaPV.name = 'ponte-vigas-pista'; raiz.add(pistaPV);
+  raiz.children.filter((o) => o.isMesh && Math.abs(o.position.x - MAPA.pontes[1]) < 0.01 && Math.abs(o.position.z) < R.meia + R.margem + 0.1 && o.position.y > 0.08)
+    .forEach((o) => pistaPV.add(o));
   criarPontes(raiz);
   const vinhetas = {};
   for (const zn of ZONAS) {

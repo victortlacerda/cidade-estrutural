@@ -196,6 +196,7 @@ export function criarVida(motor, cidade) {
         }
       }
       L.pos.copy(L.g.position);
+      L.g.visible = !bloqueado(L.pos.x, L.pos.z);
     }
   }
   const curto = (t) => t.replace(/ \([A-H]\)/g, '').replace(/^(Betoneira|Carreta|Van|Basculante|Central|Laboratorista|Amostra de barra|Corpos de prova da viga) /, (m) => m);
@@ -312,6 +313,9 @@ export function criarVida(motor, cidade) {
   botaoObra('viga', 'Viga biapoiada', A.x, 5.2, A.z + 4);
   botaoObra('compressao', 'Compressão do CP', E.x + 8, 5.0, E.z + 8);
   botaoObra('tracao', 'Tração do aço', E.x - 2, 6.2, E.z - 8);
+  const I = zona('I');
+  botaoObra('protensao', 'Protensão da viga', I.x, 4.5, I.z - 2);
+  botaoObra('icamento', 'Içamento na ponte', MAPA.pontes[1], 5, -2);
 
   // ---------- seguir um veículo ----------
   let seguindo = null;
@@ -325,7 +329,8 @@ export function criarVida(motor, cidade) {
   motor.controls.addEventListener('start', pararSeguir);
   const delta = new THREE.Vector3();
 
-  let emObra = false;
+  let emObra = false, bloqueio = null;
+  const bloqueado = (x, z) => !!bloqueio && x > bloqueio[0] && x < bloqueio[1] && z > bloqueio[2] && z < bloqueio[3];
   const v3 = new THREE.Vector3();
   function projetar() {
     const w = motor.renderer.domElement.clientWidth, h = motor.renderer.domElement.clientHeight;
@@ -361,6 +366,7 @@ export function criarVida(motor, cidade) {
       const p = c.trecho.em(c.s);
       c.g.position.set(p.x, 0.08, p.z);
       c.g.rotation.y = Math.atan2(-p.dz, p.dx);
+      c.g.visible = !bloqueado(p.x, p.z);
     }
     atualizarLogistica(dt);
     for (const q of pedestres) {
@@ -382,6 +388,7 @@ export function criarVida(motor, cidade) {
   return {
     update, eventos, logistica, placas, botoesObra, seguir, pararSeguir,
     aoSeguir: (f) => ouvintesSeguir.push(f), get seguindo() { return seguindo; },
-    set emObra(v) { emObra = v; if (v) pararSeguir(); }, get relogio() { return relogio; },
+    set emObra(v) { emObra = v; if (v) pararSeguir(); },
+    set bloqueio(b) { bloqueio = b; }, get relogio() { return relogio; },
   };
 }

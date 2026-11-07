@@ -4,9 +4,11 @@ import { criarCidade } from './world.js';
 import { criarViga } from './zones/viga.js';
 import { criarCompressao } from './zones/compressao.js';
 import { criarTracao } from './zones/tracao.js';
+import { criarProtensao } from './zones/protensao.js';
+import { criarIcamento } from './zones/icamento.js';
 import { criarUI, VISTA_GERAL } from './ui/ui.js';
 import { criarVida } from './vida.js';
-import { zona } from './config.js';
+import { zona, MAPA } from './config.js';
 
 const motor = criarMotor(document.getElementById('cena'));
 const cidade = criarCidade(motor);
@@ -16,6 +18,8 @@ const obras = {
   viga: criarViga(motor, [A.x, 0.2, A.z + 4]),
   compressao: criarCompressao(motor, [E.x - 9, 0.2, E.z + 10]),
   tracao: criarTracao(motor, [E.x + 8, 0.2, E.z + 10]),
+  protensao: criarProtensao(motor, [zona('I').x, 0.2, zona('I').z - 2]),
+  icamento: criarIcamento(motor, [MAPA.pontes[1], 0, 0]),
 };
 // ligações entre obras: o concreto e o aço da viga são os ensaiados no laboratório
 obras.viga.ligacoes = [
@@ -29,6 +33,14 @@ obras.compressao.ligacoes = [
 obras.tracao.ligacoes = [
   { texto: 'Ver as barras na viga (A1)', obra: 'viga', etapa: 2 },
   { texto: 'Ensaio do concreto (E1)', obra: 'compressao' },
+];
+obras.protensao.ligacoes = [
+  { texto: 'Levar esta viga para a ponte (C2)', obra: 'icamento' },
+  { texto: 'Como se mede a resistência do concreto (E1)', obra: 'compressao' },
+];
+obras.icamento.ligacoes = [
+  { texto: 'Como a viga foi protendida (I1)', obra: 'protensao' },
+  { texto: 'Ver a liberação da protensão (I1)', obra: 'protensao', etapa: 4 },
 ];
 const vida = criarVida(motor, cidade);
 const ui = criarUI(motor, cidade, obras, vida);
