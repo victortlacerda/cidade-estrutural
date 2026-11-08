@@ -50,7 +50,7 @@ export const ZONAS = [
   // C não é um lote: é o trecho do rio com as três pontes
   { id: 'C', nome: 'Pontes', tipo: 'rio', x: 33, z: 0,
     entrada: { rua: [66, 0], portao: [63.8, 0], vaga: [63.8, 3], vizinhos: ['n31', 'n32'] }, obras: [
-    { id: 'estaiada', nome: 'Ponte estaiada da avenida' },
+    { id: 'estaiada', nome: 'Ponte estaiada da avenida', pronta: true },
     { id: 'icamento', nome: 'Ponte em vigas: içamento e laje', pronta: true },
     { id: 'arco', nome: 'Passarela em arco atirantado' },
   ] },

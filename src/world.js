@@ -29,7 +29,7 @@ export function criarCidade(motor) {
   // rio: leito, água, cais e calçadão com guarda-corpo
   const aguaMat = new THREE.MeshStandardMaterial({ color: 0x4f8fb8, roughness: 0.25, metalness: 0.1, transparent: true, opacity: 0.88 });
   motor.aoTema((t) => aguaMat.color.set(t === 'claro' ? 0x4f8fb8 : 0x24506e));
-  raiz.add(at(box(760, 0.3, R.meia * 2, 0x6b6556, { sombra: false }), 0, R.fundo, 0));
+  const leito = at(box(760, 0.3, R.meia * 2, 0x6b6556, { sombra: false }), 0, R.fundo, 0); leito.name = 'leito'; raiz.add(leito);
   const agua = plano(760, R.meia * 2, aguaMat, 0, R.agua, 0); agua.name = 'agua';
   [-1, 1].forEach((s) => {
     raiz.add(at(box(760, -R.fundo + 0.1, 0.8, 0xa9a69e), 0, R.fundo / 2, s * (R.meia + 0.4)));
@@ -68,7 +68,9 @@ export function criarCidade(motor) {
       const y = Math.abs(k) < R.meia + R.margem ? 0.1 : 0.018;
       plano(0.25, 2.6, faixaMat, xc, y, k);
     }
-    [AV.canteiro + 0.15, AV.pista - 0.15].forEach((xl) => plano(0.18, ZMAX - ZMIN, faixaMat, s * xl, 0.1, 0));
+    const RB = R.meia + R.margem;   // linhas contínuas em três trechos (o do meio fica sobre a ponte)
+    [AV.canteiro + 0.15, AV.pista - 0.15].forEach((xl) => [[ZMIN, -RB, 0.02], [-RB, RB, 0.1], [RB, ZMAX, 0.02]]
+      .forEach(([z0, z1, y]) => plano(0.18, z1 - z0, faixaMat, s * xl, y, (z0 + z1) / 2)));
   });
   [[ZMIN, -R.meia - R.margem], [R.meia + R.margem, ZMAX]].forEach(([z0, z1]) => {
     const c = box(AV.canteiro * 2, 0.22, z1 - z0, 0xb9b8b1); c.position.set(0, 0.11, (z0 + z1) / 2); raiz.add(c);
@@ -76,6 +78,10 @@ export function criarCidade(motor) {
     for (let z = z0 + 6; z < z1 - 3; z += 12) if (!MAPA.Z.some((zz) => Math.abs(zz - z) < 8)) arvore(raiz, 0, z, arvMat, 0.8);
   });
 
+  // pista e faixas da avenida sobre o rio num grupo próprio (a obra C3 esconde enquanto constrói)
+  const pistaEst = new THREE.Group(); pistaEst.name = 'ponte-estaiada-pista'; raiz.add(pistaEst);
+  raiz.children.filter((o) => o.isMesh && o.geometry.type === 'PlaneGeometry' && Math.abs(o.position.x) <= AV.pista && Math.abs(o.position.z) < R.meia + R.margem + 0.1 && o.position.y > 0.08)
+    .forEach((o) => pistaEst.add(o));
   // pista e faixas sobre a ponte em vigas num grupo próprio (a obra C2 esconde enquanto constrói)
   const pistaPV = new THREE.Group(); pistaPV.name = 'ponte-vigas-pista'; raiz.add(pistaPV);
   raiz.children.filter((o) => o.isMesh && Math.abs(o.position.x - MAPA.pontes[1]) < 0.01 && Math.abs(o.position.z) < R.meia + R.margem + 0.1 && o.position.y > 0.08)

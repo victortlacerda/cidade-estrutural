@@ -316,6 +316,7 @@ export function criarVida(motor, cidade) {
   const I = zona('I');
   botaoObra('protensao', 'Protensão da viga', I.x, 4.5, I.z - 2);
   botaoObra('icamento', 'Içamento na ponte', MAPA.pontes[1], 5, -2);
+  botaoObra('estaiada', 'Ponte estaiada', 0, 37, 0);
 
   // ---------- seguir um veículo ----------
   let seguindo = null;

@@ -6,6 +6,7 @@ import { criarCompressao } from './zones/compressao.js';
 import { criarTracao } from './zones/tracao.js';
 import { criarProtensao } from './zones/protensao.js';
 import { criarIcamento } from './zones/icamento.js';
+import { criarEstaiada } from './zones/estaiada.js';
 import { criarUI, VISTA_GERAL } from './ui/ui.js';
 import { criarVida } from './vida.js';
 import { zona, MAPA } from './config.js';
@@ -20,6 +21,7 @@ const obras = {
   tracao: criarTracao(motor, [E.x + 8, 0.2, E.z + 10]),
   protensao: criarProtensao(motor, [zona('I').x, 0.2, zona('I').z - 2]),
   icamento: criarIcamento(motor, [MAPA.pontes[1], 0, 0]),
+  estaiada: criarEstaiada(motor, [MAPA.pontes[0], 0, 0]),
 };
 // ligações entre obras: o concreto e o aço da viga são os ensaiados no laboratório
 obras.viga.ligacoes = [
@@ -42,6 +44,11 @@ obras.icamento.ligacoes = [
   { texto: 'Como a viga foi protendida (I1)', obra: 'protensao' },
   { texto: 'Ver a liberação da protensão (I1)', obra: 'protensao', etapa: 4 },
 ];
+obras.estaiada.ligacoes = [
+  { texto: 'Outra solução: ponte em vigas (C2)', obra: 'icamento' },
+  { texto: 'O aço que vira cordoalha (E2)', obra: 'tracao' },
+];
+obras.icamento.ligacoes.push({ texto: 'Outra solução: ponte estaiada (C3)', obra: 'estaiada' });
 const vida = criarVida(motor, cidade);
 const ui = criarUI(motor, cidade, obras, vida);
 

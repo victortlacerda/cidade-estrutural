@@ -9,6 +9,7 @@ Obras prontas:
 - **E2 · Tração da barra de aço CA-50** (`#tracao`): elástico, escoamento, estricção, ruptura e leitura.
 - **I1 · Viga pré-moldada protendida** (`#protensao`): cordoalhas, cura térmica, liberação com mapa de tensões e contraflecha.
 - **C2 · Ponte em vigas: içamento e laje** (`#icamento`): guindaste, transversinas, laje e tráfego.
+- **C3 · Ponte estaiada da avenida** (`#estaiada`): estacas no leito, mastro, balanço sucessivo com estais, fechamento.
 
 ## Como abrir
 

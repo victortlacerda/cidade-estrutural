@@ -1,12 +1,43 @@
 # Cidade Estrutural — Roadmap
 
-**Versão v0.6 · 07/11/2026**
+**Versão v0.7 · 08/11/2026**
 
 Um mundo 3D navegável no navegador em que cada lote é uma zona temática de engenharia estrutural, e cada obra tem uma sequência animada em vista em corte: do canteiro (fôrma, armadura, concretagem) até o comportamento estrutural (esforços, tensões, fissuras, flecha), com números calculados em código e o texto escrito a partir deles.
 
 Herda o método da Cidade Geotécnica (obra por obra, função do tempo, corte com painéis planares), do Showroom 3D (regras puras testadas antes da cena) e da Arena (roadmap vivo, decisões numeradas, arquivo único que abre por duplo clique).
 
-## O que mudou nesta rodada (v0.6) — viga protendida do pátio à ponte
+## O que mudou nesta rodada (v0.7) — ponte estaiada da avenida
+
+- **Obra C3 · Ponte estaiada da avenida** (1:56 min, `#estaiada`). Sete etapas:
+  - fundação com o leito do rio em corte (lama, areia e rocha), 6 estacas e bloco;
+  - mastro em fôrma trepante (etapas de 4 m);
+  - aduela de disparo e carros de avanço;
+  - balanço sucessivo alternando norte e sul, com estais passados e tensionados a cada par;
+  - fechamento nos encontros;
+  - acabamento e tráfego;
+  - leitura.
+- Painel do balanço: barras de força de cada estai e o **desequilíbrio no mastro** quando um lado está uma aduela à frente.
+- A ponte estaiada e a pista da avenida sobre o rio somem enquanto a obra está aberta, e o trânsito da avenida é bloqueado. Na etapa da fundação, a água e o fundo do rio somem para mostrar o corte.
+- Cálculos em `src/calc/estaiada.js`, com 6 testes novos (32 no total).
+
+### C3 · Valores adotados (exemplo, não é de projeto)
+- **Tabuleiro:** 17 m de largura e espessura equivalente de 35 cm → 148,75 kN/m; aduela de 3 m = 446 kN; carro de avanço de 450 kN.
+- **Mastro:** 34 m acima do tabuleiro, seção 2,0 × 2,8 m; ancoragens a cada 1,6 m.
+- **Estais** com permanente de 25 kN/m:
+  - E1: 87° → 522 kN; E7: 47° → 717 kN;
+  - 5 a 6 cordoalhas φ15,7 por estai, a 0,45 fptk; 74 cordoalhas no total.
+- **Esforços:**
+  - mastro: 12,1 MN, cerca de 2,2 MPa (só peso próprio e estais);
+  - tabuleiro: 1663 kN de compressão junto ao mastro;
+  - desequilíbrio máximo (aduela 7 de um lado só): 18,8 MN·m.
+
+### Pendente
+- [ ] Modelo simplificado: cada par de estais segura só a sua aduela (sem continuidade do tabuleiro nem rigidez do mastro).
+- [ ] Carga móvel (veículos) e vento não entram na leitura.
+- [ ] Estacas de 1,2 m até 10,5 m abaixo do leito: profundidade e diâmetro ilustrativos (sem geotecnia).
+- [ ] Ajuste final de força dos estais (sequência de tensionamento real) não modelado.
+
+## Rodada anterior (v0.6) — viga protendida do pátio à ponte
 
 - **Obra I1 · Viga pré-moldada protendida** (1:58 min, `#protensao`). Sete etapas: pista, cordoalhas e macaco, armadura passiva e isolamento, concretagem e cura térmica, liberação, leitura, saque. Na liberação, a face cortada vira um **mapa de tensões** (azul comprimido, vermelho tracionado) e a viga ganha contraflecha.
 - **Obra C2 · Ponte em vigas: içamento e laje** (1:48 min, `#icamento`). Sete etapas: apoios de neoprene, chegada da carreta, içamento das 4 vigas pelo guindaste, transversinas, laje, pavimento e tráfego, leitura. A contraflecha cai de 13,1 para 1,4 mm conforme a laje é concretada.
@@ -113,7 +144,7 @@ Pedido do usuário: "está meio sem vida, não parece uma cidade dinâmica com i
 |---|---|---|
 | A | Concreto armado | [x] Viga biapoiada · [ ] Pilar e flambagem · [ ] Laje maciça e nervurada · [ ] Sapata isolada |
 | B | Estruturas de aço | [ ] Treliça de cobertura · [ ] Ligação parafusada e soldada · [ ] Pórtico de galpão |
-| C | Pontes (no rio, sem lote) | [ ] Ponte estaiada da avenida · [x] Ponte em vigas: içamento e laje (C2) · [ ] Passarela em arco atirantado — as três já existem no rio; falta a sequência em corte |
+| C | Pontes (no rio, sem lote) | [x] Ponte estaiada da avenida (C3) · [x] Ponte em vigas: içamento e laje (C2) · [ ] Passarela em arco atirantado — as três já existem no rio; falta a sequência em corte |
 | D | Edifícios altos | [ ] Vento e deslocamento lateral · [ ] Núcleo rígido e contraventamento |
 | E | Laboratório de materiais | [x] Compressão do corpo de prova · [x] Tração da barra de aço · [ ] Abatimento (slump) |
 | F | Patologias e reforço | [ ] Corrosão de armadura · [ ] Reforço com fibra de carbono |
@@ -234,7 +265,8 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 ### Perguntas abertas
 
-- **D12 · Próxima obra** — ⭐ Ponte estaiada da avenida (balanço sucessivo das aduelas e estais tensionados um a um) · Passarela em arco · Pilar e flambagem (A2). Ajustar: ___
+- **D13 · Próxima obra** — ⭐ Passarela em arco atirantado (completa a zona C) · Pilar e flambagem (A2) · Laje maciça e nervurada (A3). Ajustar: ___
+- **D12 · Próxima obra** (respondida: C3 estaiada) — ⭐ Ponte estaiada da avenida (balanço sucessivo das aduelas e estais tensionados um a um) · Passarela em arco · Pilar e flambagem (A2). Ajustar: ___
 - **D11 · Próxima obra em corte** (respondida: I1 + C2) — ⭐ Ponte estaiada da avenida (C3: balanço sucessivo das aduelas, estais tensionados um a um) · Protensão no pátio (I1) seguida do içamento da viga na ponte (C2) · Abatimento E3. Ajustar: ___
 - **D10 · Logística sincronizada** — ⭐ a betoneira chega à viga exatamente quando a obra entra na concretagem (mais didático) · deixar independente, como agora (mais simples). Ajustar: ___
 - **D09 · Próxima obra** — ⭐ Abatimento (slump test, E3, fecha o laboratório) · Pilar e flambagem (A2) · Ponte estaiada (C3). Ajustar: ___
@@ -281,6 +313,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.7 | 08/11/2026 | Obra C3 ponte estaiada em balanço sucessivo; leito do rio em corte; 32 testes |
 | v0.6 | 07/11/2026 | Obras I1 protensão e C2 içamento na ponte; mapa de tensões na face; ponte some durante a obra; 26 testes |
 | v0.5 | 06/11/2026 | Zona C = Pontes (rio, balsa de inspeção); nova zona I = Pré-moldados; carreta de vigas I → ponte em vigas |
 | v0.4 | 06/11/2026 | Rio cortando a cidade, avenida central 2 × 2 faixas, marginais, 3 pontes reais (estaiada, vigas, arco), zona C pré-moldados, barcos; 20 testes |
