@@ -60,7 +60,7 @@ Fôrmas, armaduras, concretagem, protensão, içamento e estais são animados em
 ## Como abrir
 
 - **Arquivo único:** baixe `docs/app/index.html` e dê duplo clique. Para abrir direto numa obra, acrescente ao endereço `#viga`, `#compressao`, `#tracao`, `#protensao`, `#icamento` ou `#estaiada`.
-- **No GitHub Pages:** em *Settings → Pages*, escolha *Deploy from a branch → main → /docs*. O app fica em `https://<usuário>.github.io/cidade-estrutural/app/`.
+- **No GitHub Pages:** em *Settings → Pages*, escolha *Deploy from a branch → main → /docs*. O endereço `https://<usuário>.github.io/cidade-estrutural/` abre o app direto (não precisa de GitHub Actions: o arquivo já vem pronto em `docs/app`).
 - **Controles:** arraste para girar, role para aproximar, espaço pausa, Esc sai da obra.
 
 ## Para desenvolver
