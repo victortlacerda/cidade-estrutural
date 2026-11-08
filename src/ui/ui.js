@@ -126,24 +126,11 @@ export function criarUI(motor, cidade, obras, vida) {
     const l = atual.ligacoes[+b.dataset.lig]; abrir(l.obra, l.etapa ?? 0);
   });
 
-  // vida da cidade: placas, botões de obra, veículos, painel "Agora na cidade"
-  let ultimoEvento = null;
-  function atualizarAgora() {
-    if (!vida) return;
-    const ev = vida.eventos[0];
-    if (ev === ultimoEvento) return;
-    ultimoEvento = ev;
-    $('eventos').innerHTML = vida.eventos.slice(0, 4).map((e, i) =>
-      `<li><span>${esc(e.texto)}</span>${e.alvo ? `<button type="button" data-seguir="${i}">Seguir</button>` : ''}</li>`).join('')
-      || '<li><span>Veículos saindo para as primeiras entregas…</span></li>';
-  }
+  // vida da cidade: placas, botões de obra e veículo seguido
+  function atualizarAgora() {}
   if (vida) {
     vida.placas.forEach((p) => { p.el.onclick = () => { pararTour(); sair(); vida.pararSeguir(); motor.voar(vistaZona(p.zona)); }; });
     vida.botoesObra.forEach((b) => { b.el.onclick = () => abrir(b.obra); });
-    $('eventos').addEventListener('click', (e) => {
-      const b = e.target.closest('[data-seguir]'); if (!b) return;
-      pararTour(); vida.seguir(vida.eventos[+b.dataset.seguir].alvo);
-    });
     vida.aoSeguir((v) => { $('seguindo').hidden = !v; if (v) $('seguindo').textContent = `Seguindo ${v.nome} · parar`; });
     $('seguindo').onclick = () => vida.pararSeguir();
   }

@@ -313,6 +313,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.7.2 | 08/11/2026 | Cena mais limpa: sem painel "Agora na cidade"; etiqueta do veículo só ao passar o mouse (clique segue); placas de zona menores, só letra e nome |
 | v0.7.1 | 08/11/2026 | Repositório no GitHub (victortlacerda/cidade-estrutural); README comercial com 12 imagens; app em docs/app para o GitHub Pages; água fosca |
 | v0.7 | 08/11/2026 | Obra C3 ponte estaiada em balanço sucessivo; leito do rio em corte; 32 testes |
 | v0.6 | 07/11/2026 | Obras I1 protensão e C2 içamento na ponte; mapa de tensões na face; ponte some durante a obra; 26 testes |

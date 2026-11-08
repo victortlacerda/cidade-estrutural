@@ -40,7 +40,7 @@ Fôrmas, armaduras, concretagem, protensão, içamento e estais são animados em
 
 | | |
 |---|---|
-| ![Logística entre as obras](docs/img/03-logistica.jpg) | **Agora na cidade.** O painel conta o que está acontecendo ("Betoneira cruza a ponte estaiada com C25 para a viga") e o botão **Seguir** põe a câmera atrás do veículo. As placas das zonas mudam conforme a atividade. |
+| ![Logística entre as obras](docs/img/03-logistica.jpg) | **Cena limpa, informação sob demanda.** Placas discretas com a letra e o nome de cada zona. Passe o mouse num caminhão para ver o que ele leva e para onde vai; clique e a câmera passa a segui-lo. |
 | ![Tema escuro](docs/img/11-escuro.jpg) | **Tema claro e escuro**, com rótulos que acompanham a narração e só um destaque por vez. |
 
 <p align="center"><img src="docs/img/12-celular.jpg" width="300" alt="Cidade Estrutural no celular"></p>

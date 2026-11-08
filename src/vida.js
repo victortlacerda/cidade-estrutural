@@ -297,7 +297,7 @@ export function criarVida(motor, cidade) {
   }
   const placas = ZONAS.map((z) => {
     const e = etiqueta('zona'); e.pos.set(z.x, 11, z.z - 6);
-    e.el.innerHTML = `<b>${z.id}</b><span class="nm"></span><span class="at"></span>`;
+    e.el.innerHTML = `<b>${z.id}</b><span class="nm"></span>`;
     e.el.querySelector('.nm').textContent = z.nome;
     e.zona = z; return e;
   });
@@ -330,7 +330,28 @@ export function criarVida(motor, cidade) {
   motor.controls.addEventListener('start', pararSeguir);
   const delta = new THREE.Vector3();
 
-  let emObra = false, bloqueio = null;
+  let emObra = false, bloqueio = null, sobre = null;
+  // passar o mouse num veículo mostra a etiqueta; clicar segue o veículo
+  const rc = new THREE.Raycaster(), ndc = new THREE.Vector2(), canvas = motor.renderer.domElement;
+  function veiculoNo(ev) {
+    const r = canvas.getBoundingClientRect();
+    ndc.set((ev.clientX - r.left) / r.width * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    motor.camera.updateMatrixWorld(); rc.setFromCamera(ndc, motor.camera);
+    const hit = rc.intersectObjects(logistica.filter((L) => L.g.visible).map((L) => L.g), true)[0];
+    if (!hit) return null;
+    return logistica.find((L) => { for (let q = hit.object; q; q = q.parent) if (q === L.g) return true; return false; });
+  }
+  let ultimoMove = 0, desce = null;
+  canvas.addEventListener('pointermove', (ev) => {
+    if (emObra || ev.timeStamp - ultimoMove < 60) return; ultimoMove = ev.timeStamp;
+    sobre = veiculoNo(ev); canvas.style.cursor = sobre ? 'pointer' : '';
+  });
+  canvas.addEventListener('pointerleave', () => { sobre = null; canvas.style.cursor = ''; });
+  canvas.addEventListener('pointerdown', (ev) => { desce = [ev.clientX, ev.clientY]; });
+  canvas.addEventListener('pointerup', (ev) => {
+    if (emObra || !desce || Math.hypot(ev.clientX - desce[0], ev.clientY - desce[1]) > 5) return;
+    const v = veiculoNo(ev); if (v) { sobre = v; seguir(v); }
+  });
   const bloqueado = (x, z) => !!bloqueio && x > bloqueio[0] && x < bloqueio[1] && z > bloqueio[2] && z < bloqueio[3];
   const v3 = new THREE.Vector3();
   function projetar() {
@@ -344,16 +365,13 @@ export function criarVida(motor, cidade) {
       if (!fora) e.el.style.transform = `translate(${((v3.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v3.y) / 2 * h).toFixed(1)}px)`;
     };
     for (const p of placas) {
-      const oc = ocupado[p.zona.id];
-      const txt = oc && oc.ate > relogio ? oc.texto : ATIV[p.zona.id];
-      const at = p.el.querySelector('.at'); if (at.textContent !== txt) { at.textContent = txt; p.el.classList.toggle('ativa', !!(oc && oc.ate > relogio)); }
       mostrar(p, !emObra && dCam > 45);
     }
     for (const L of logistica) {
       if (L.tag.el.textContent !== `${L.nome} · ${L.estado}`) L.tag.el.textContent = `${L.nome} · ${L.estado}`;
       L.tag.pos.set(L.pos.x, 5.5, L.pos.z);
       L.tag.el.classList.toggle('seguindo', seguindo === L);
-      mostrar(L.tag, !emObra);
+      mostrar(L.tag, !emObra && (sobre === L || seguindo === L));
     }
     for (const b of botoesObra) mostrar(b, !emObra && dCam < 150);
   }
