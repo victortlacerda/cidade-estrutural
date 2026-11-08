@@ -261,7 +261,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 | D04 | Exagero visual | ⭐ deformada 40×, barras 1,5×, sempre avisado na tela | legibilidade |
 | D05 | Norma de referência | ⭐ NBR 6118 simplificada | textos e números |
 | D07 | Próxima obra (v0.1) | ⭐ E1 compressão, e também E2 tração ("continue") | fecham C25 e CA-50 da viga |
-| D06 | Repositório | ⏳ `cidade-estrutural` ainda não existe no GitHub da sessão; entregue como bundle | ver próximos passos |
+| D06 | Repositório | ✅ github.com/victortlacerda/cidade-estrutural (todos os commits) | push a cada rodada |
 
 ### Perguntas abertas
 
@@ -313,6 +313,7 @@ scripts/cutn.mjs       fotos headless por instante da obra
 
 | Versão | Data | Mudança |
 |---|---|---|
+| v0.7.1 | 08/11/2026 | Repositório no GitHub (victortlacerda/cidade-estrutural); README comercial com 12 imagens; app em docs/app para o GitHub Pages; água fosca |
 | v0.7 | 08/11/2026 | Obra C3 ponte estaiada em balanço sucessivo; leito do rio em corte; 32 testes |
 | v0.6 | 07/11/2026 | Obras I1 protensão e C2 içamento na ponte; mapa de tensões na face; ponte some durante a obra; 26 testes |
 | v0.5 | 06/11/2026 | Zona C = Pontes (rio, balsa de inspeção); nova zona I = Pré-moldados; carreta de vigas I → ponte em vigas |

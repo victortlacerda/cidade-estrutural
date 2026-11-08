@@ -1,44 +1,80 @@
 # Cidade Estrutural
 
-Cidade 3D no navegador em que cada lote é uma zona de engenharia estrutural e cada obra tem uma sequência animada em vista em corte, com os números calculados em código.
+**Uma cidade 3D onde cada obra se abre em corte e mostra, passo a passo, como a estrutura é construída e por que ela funciona.**
 
-Obras prontas:
+![Visão geral da Cidade Estrutural](docs/img/01-cidade.jpg)
 
-- **A1 · Viga biapoiada de concreto armado** (`#viga`): fôrma, armadura, concretagem, cura, carregamento, fissuração e flecha.
-- **E1 · Compressão do corpo de prova** (`#compressao`): moldagem, cura, retificação, prensa, resultado do lote.
-- **E2 · Tração da barra de aço CA-50** (`#tracao`): elástico, escoamento, estricção, ruptura e leitura.
-- **I1 · Viga pré-moldada protendida** (`#protensao`): cordoalhas, cura térmica, liberação com mapa de tensões e contraflecha.
-- **C2 · Ponte em vigas: içamento e laje** (`#icamento`): guindaste, transversinas, laje e tráfego.
-- **C3 · Ponte estaiada da avenida** (`#estaiada`): estacas no leito, mastro, balanço sucessivo com estais, fechamento.
+Fôrmas, armaduras, concretagem, protensão, içamento e estais são animados em tempo real. Ao lado aparecem os esforços, as tensões, as fissuras e as flechas, todos calculados em código. É engenharia estrutural de verdade, explicada para quem está aprendendo, e roda direto no navegador, sem instalar nada.
+
+---
+
+## Destaques
+
+- **Vista em corte animada.** Cada obra se abre ao meio e mostra o que normalmente fica escondido: barras de aço, cordoalhas, camadas do leito do rio, mapa de tensões no concreto.
+- **Números que concordam com a imagem.** Diagramas, legendas e textos saem das mesmas funções de cálculo (NBR 6118 simplificada), testadas automaticamente (32 testes).
+- **Uma cidade viva.** Trânsito, pedestres, barcos, gruas e operários trabalhando. A logística liga as obras: a betoneira sai da central e cruza a ponte até a viga; a van leva os corpos de prova para o laboratório; a carreta leva a viga pré-moldada até a ponte.
+- **Obras conectadas.** A viga leva ao ensaio do seu concreto e do seu aço; a viga protendida do pátio é a mesma que o guindaste coloca na ponte.
+- **Para assistir ou explorar.** Tour guiado, linha do tempo arrastável, pausa e velocidade, tema claro e escuro, e funciona no celular.
+- **Arquivo único.** Um `.html` de ~630 KB que abre com duplo clique, sem servidor e sem internet.
+
+![Rio, avenida central e as três pontes](docs/img/02-rio-pontes.jpg)
+
+---
+
+## As obras
+
+| | |
+|---|---|
+| ![Viga biapoiada](docs/img/04-viga.jpg) | **A1 · Viga biapoiada de concreto armado**<br>Fôrma, armadura, concretagem e cura; depois a carga cresce, os diagramas de cortante e de momento aparecem, a viga fissura onde o momento é máximo e a flecha é comparada com L/250. |
+| ![Compressão do corpo de prova](docs/img/05-compressao.jpg) | **E1 · Compressão do corpo de prova**<br>Moldagem, cura e retificação; o cilindro vai para a prensa, rompe em cone e entra na estatística do lote (fck estimado). |
+| ![Tração da barra de aço](docs/img/06-tracao.jpg) | **E2 · Tração da barra CA-50**<br>Regime elástico, patamar de escoamento, encruamento e estricção (o "pescoço") até a ruptura, com a verificação da NBR 7480. |
+| ![Viga protendida](docs/img/07-protensao.jpg) | **I1 · Viga pré-moldada protendida**<br>Cordoalhas tensionadas uma a uma, cura térmica e liberação: a face cortada vira um mapa de tensões e a viga ganha contraflecha. |
+| ![Içamento na ponte](docs/img/08-icamento.jpg) | **C2 · Ponte em vigas: içamento e laje**<br>O guindaste coloca as quatro vigas sobre os aparelhos de neoprene; a laje é concretada e a contraflecha quase zera. |
+| ![Ponte estaiada](docs/img/09-estaiada.jpg) | **C3 · Ponte estaiada da avenida**<br>Estacas no leito, mastro em fôrma trepante e balanço sucessivo: aduelas alternadas e estais tensionados par a par, com o desequilíbrio do mastro em tempo real. |
+
+![Fundação da ponte estaiada com o leito do rio em corte](docs/img/10-estaiada-fundacao.jpg)
+
+---
+
+## A cidade
+
+| | |
+|---|---|
+| ![Logística entre as obras](docs/img/03-logistica.jpg) | **Agora na cidade.** O painel conta o que está acontecendo ("Betoneira cruza a ponte estaiada com C25 para a viga") e o botão **Seguir** põe a câmera atrás do veículo. As placas das zonas mudam conforme a atividade. |
+| ![Tema escuro](docs/img/11-escuro.jpg) | **Tema claro e escuro**, com rótulos que acompanham a narração e só um destaque por vez. |
+
+<p align="center"><img src="docs/img/12-celular.jpg" width="300" alt="Cidade Estrutural no celular"></p>
+
+**Zonas:** A Concreto armado · B Estruturas de aço · C Pontes (no rio) · D Edifícios altos · E Laboratório de materiais · F Patologias e reforço · G Madeira e alvenaria · H Central de concreto e aço · I Pré-moldados.
+
+---
+
+## Para quem
+
+- **Cursos de engenharia civil e escolas técnicas:** aula de estruturas com o canteiro e o comportamento na mesma tela.
+- **Construtoras e pré-moldadoras:** apresentar o método construtivo a clientes e equipes.
+- **Feiras, museus e eventos:** tela grande em modo tour, que se repete sozinha.
+
+---
 
 ## Como abrir
 
-Dê duplo clique em `cidade-estrutural.html`. Não precisa de servidor nem internet (sem internet ele usa as fontes do computador).
-Para abrir direto numa obra: `cidade-estrutural.html#viga` (ou `#compressao`, `#tracao`).
-
-Atalhos: espaço pausa, Esc sai da obra. Arraste para girar, role para aproximar.
+- **Arquivo único:** baixe `docs/app/index.html` e dê duplo clique. Para abrir direto numa obra, acrescente ao endereço `#viga`, `#compressao`, `#tracao`, `#protensao`, `#icamento` ou `#estaiada`.
+- **No GitHub Pages:** em *Settings → Pages*, escolha *Deploy from a branch → main → /docs*. O app fica em `https://<usuário>.github.io/cidade-estrutural/app/`.
+- **Controles:** arraste para girar, role para aproximar, espaço pausa, Esc sai da obra.
 
 ## Para desenvolver
 
 ```bash
 npm install
 npm run dev        # servidor local
-npm test           # testes dos cálculos (node --test)
-npm run artifact   # gera dist/cidade-estrutural.html e dist/artifact.html
-node scripts/cutn.mjs v "8,40,92,115"   # fotos da obra em /tmp/e
+npm test           # 32 testes dos cálculos e da malha viária (node --test)
+npm run artifact   # gera dist/cidade-estrutural.html e docs/app/index.html
+node scripts/prints.mjs   # refaz as imagens de docs/img
 ```
 
-Planejamento, decisões e pendências: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Tecnologia: Three.js 0.170, Vite 5 e JavaScript puro, sem framework. Cálculos e malha viária em módulos puros (`src/calc`, `src/core/malha.js`); uma obra por arquivo em `src/zones`.
 
-## Enviar para o GitHub
+Planejamento, decisões, valores adotados e pendências: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-O projeto vem como `cidade-estrutural.bundle`. Crie o repositório **vazio** `cidade-estrutural` no GitHub (sem README) e rode:
-
-```bash
-git clone cidade-estrutural.bundle cidade-estrutural
-cd cidade-estrutural
-git remote set-url origin https://github.com/SEU-USUARIO/cidade-estrutural.git
-git push -u origin main
-```
-
-Os números das obras são exemplos didáticos, não são de projeto.
+> Os números das obras são exemplos didáticos, não são de projeto.

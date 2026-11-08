@@ -102,6 +102,7 @@ export function criarMotor(container) {
   redimensionar();
 
   return {
+    raycasterClass: THREE.Raycaster,
     renderer, scene, camera, controls, sol, hemi, voar, pular, atualizarVoo, aplicarTema,
     get tema() { return tema; }, aoTema: (f) => ouvintesTema.push(f), rotulo, projetarRotulos, redimensionar,
   };

@@ -27,7 +27,7 @@ export function criarCidade(motor) {
   [-1, 1].forEach((s) => plano(760, 300, chaoMat, 0, -0.02, s * (R.meia + 150)));
 
   // rio: leito, água, cais e calçadão com guarda-corpo
-  const aguaMat = new THREE.MeshStandardMaterial({ color: 0x4f8fb8, roughness: 0.25, metalness: 0.1, transparent: true, opacity: 0.88 });
+  const aguaMat = new THREE.MeshStandardMaterial({ color: 0x4f8fb8, roughness: 0.7, metalness: 0, transparent: true, opacity: 0.9 });
   motor.aoTema((t) => aguaMat.color.set(t === 'claro' ? 0x4f8fb8 : 0x24506e));
   const leito = at(box(760, 0.3, R.meia * 2, 0x6b6556, { sombra: false }), 0, R.fundo, 0); leito.name = 'leito'; raiz.add(leito);
   const agua = plano(760, R.meia * 2, aguaMat, 0, R.agua, 0); agua.name = 'agua';
